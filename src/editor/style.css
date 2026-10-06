@@ -1,0 +1,59 @@
+.wikidot-monaco {
+  box-sizing: border-box;
+  min-height: 160px;
+  max-width: 100%;
+  border: 1px solid #c8c8c8;
+  overflow: hidden;
+  resize: vertical;
+
+  /* Inherited text properties reach into Monaco's shadow DOM; keep site CSS out. */
+  text-align: left;
+  text-indent: 0;
+  text-transform: none;
+  letter-spacing: normal;
+  word-spacing: normal;
+  line-height: normal;
+  font-style: normal;
+  white-space: normal;
+}
+
+/*
+ * The context menu lives in a shadow root outside .monaco-editor, where the theme's
+ * color variables are not defined, so it renders transparent. Custom properties do
+ * inherit into shadow trees, so define the menu colors on the shadow host only:
+ * set on the wrapper they would leak into themes that leave some of them undefined.
+ */
+.wikidot-monaco > .shadow-root-host {
+  --vscode-menu-background: #ffffff;
+  --vscode-menu-foreground: #1f1f1f;
+  --vscode-menu-border: #c8c8c8;
+  --vscode-menu-separatorBackground: #e0e0e0;
+  --vscode-menu-selectionBorder: transparent;
+  --vscode-list-hoverBackground: #e8e8e8;
+  --vscode-list-hoverForeground: #1f1f1f;
+  --vscode-disabledForeground: #9e9e9e;
+  --vscode-widget-shadow: rgba(0, 0, 0, 0.16);
+  --vscode-scrollbar-shadow: transparent;
+  --vscode-scrollbarSlider-background: rgba(100, 100, 100, 0.4);
+  --vscode-scrollbarSlider-hoverBackground: rgba(100, 100, 100, 0.7);
+  --vscode-scrollbarSlider-activeBackground: rgba(0, 0, 0, 0.6);
+  --vscode-strokeThickness: 1px;
+  --vscode-cornerRadius-medium: 0;
+  --vscode-cornerRadius-large: 0;
+}
+
+/*
+ * List labels (command palette, etc.) are <a> elements, which wikidot themes style via
+ * `a` / `a:hover`, often behind an ID selector. Monaco sets none of these properties on
+ * the label itself, so reset them; `:not(#\#)` lifts specificity above ID-based rules.
+ */
+.wikidot-monaco:not(#\#):not(#\#) a.label-name,
+.wikidot-monaco:not(#\#):not(#\#) a.label-name:hover,
+.wikidot-monaco:not(#\#):not(#\#) a.label-name:focus {
+  background: none !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}

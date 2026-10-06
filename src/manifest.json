@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Wikidot Monaco",
+  "description": "__MSG_description__",
+  "version": "0.0.0",
+  "default_locale": "en",
+  "minimum_chrome_version": "111",
+  "icons": {
+    "16": "img/logo-16.png",
+    "32": "img/logo-32.png",
+    "48": "img/logo-48.png",
+    "128": "img/logo-128.png"
+  },
+  "action": {
+    "default_icon": "img/logo-48.png"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.wikidot.com/*"],
+      "exclude_matches": ["*://wikidot.com/*"],
+      "js": ["content/bridge.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.wikidot.com/*"],
+      "exclude_matches": ["*://wikidot.com/*"],
+      "js": ["content/main.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["editor/*"],
+      "matches": ["*://*.wikidot.com/*"]
+    }
+  ]
+}

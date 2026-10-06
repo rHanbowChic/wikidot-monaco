@@ -1,0 +1,207 @@
+/* Styled after VS Code's settings editor, using Monaco's light/dark theme colors. */
+:root {
+  --bg: #ffffff;
+  --fg: #3b3b3b;
+  --fg-strong: #1f1f1f;
+  --muted: #6f6f6f;
+  --line: #e5e5e5;
+  --input-bg: #ffffff;
+  --input-border: #cecece;
+  --focus: #0090f1;
+  --accent: #005fb8;
+  --accent-fg: #ffffff;
+  --hover: rgba(0, 0, 0, 0.04);
+  --button-bg: #e5e5e5;
+  --button-hover: #cccccc;
+  --code-bg: rgba(0, 0, 0, 0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e1e;
+    --fg: #cccccc;
+    --fg-strong: #e7e7e7;
+    --muted: #9d9d9d;
+    --line: #2b2b2b;
+    --input-bg: #313131;
+    --input-border: #3c3c3c;
+    --focus: #007fd4;
+    --accent: #0078d4;
+    --accent-fg: #ffffff;
+    --hover: rgba(255, 255, 255, 0.04);
+    --button-bg: #313131;
+    --button-hover: #3c3c3c;
+    --code-bg: rgba(255, 255, 255, 0.1);
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+/* Set on body: Chrome's default stylesheet for extension pages sets body to 75%. */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    'Ubuntu', 'Droid Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px 48px;
+}
+
+header {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  margin: 0;
+  color: var(--fg-strong);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: 32px 0 8px;
+  color: var(--fg-strong);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* One setting: bold title, muted description, control below. */
+.setting {
+  margin: 0 -16px;
+  padding: 12px 14px 16px;
+  border-left: 2px solid transparent;
+}
+
+.setting:hover {
+  background: var(--hover);
+}
+
+.setting:focus-within {
+  border-left-color: var(--focus);
+}
+
+.title {
+  display: block;
+  color: var(--fg-strong);
+  font-weight: 600;
+}
+
+.title + select,
+.title + input {
+  margin-top: 4px;
+}
+
+.description {
+  margin: 2px 0 8px;
+  color: var(--muted);
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 4px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+code {
+  padding: 0 4px;
+  background: var(--code-bg);
+  color: var(--fg);
+  font-family: Consolas, 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+/* Controls */
+input[type='checkbox'] {
+  appearance: none;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 3px 0 0;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg) center / 14px no-repeat;
+  cursor: pointer;
+}
+
+input[type='checkbox']:checked {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3 3 7-7' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E");
+}
+
+select,
+input[type='number'] {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--input-border);
+  background-color: var(--input-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 15px;
+}
+
+select {
+  appearance: none;
+  min-width: 240px;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238a8a8a' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-position: right 6px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+input[type='number'] {
+  width: 100px;
+}
+
+select:focus,
+input:focus-visible,
+button:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: -1px;
+}
+
+footer {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+button {
+  height: 30px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--button-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--button-hover);
+}
+
+#status {
+  color: var(--muted);
+}

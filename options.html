@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/icons/logo.ico" />
+    <title data-i18n="title"></title>
+  </head>
+  <body>
+    <!-- Text comes from src/options/messages.ts, filled in by data-i18n key. -->
+    <main>
+      <header>
+        <h1>Wikidot Monaco</h1>
+      </header>
+
+      <form id="settings">
+        <section>
+          <h2 data-i18n="editor"></h2>
+          <div class="setting">
+            <div class="title" data-i18n="enabled"></div>
+            <label class="check">
+              <input type="checkbox" name="enabled" />
+              <span data-i18n="enabledHint"></span>
+            </label>
+          </div>
+          <div class="setting">
+            <label class="title" for="theme" data-i18n="theme"></label>
+            <select id="theme" name="theme">
+              <option value="auto" data-i18n="themeAuto"></option>
+              <option value="light" data-i18n="themeLight"></option>
+              <option value="dark" data-i18n="themeDark"></option>
+            </select>
+          </div>
+          <div class="setting">
+            <label class="title" for="fontSize" data-i18n="fontSize"></label>
+            <input id="fontSize" type="number" name="fontSize" min="10" max="28" step="1" />
+          </div>
+          <div class="setting">
+            <div class="title" data-i18n="wordWrap"></div>
+            <label class="check">
+              <input type="checkbox" name="wordWrap" />
+              <span data-i18n="wordWrapHint"></span>
+            </label>
+          </div>
+          <div class="setting">
+            <div class="title" data-i18n="minimap"></div>
+            <label class="check">
+              <input type="checkbox" name="minimap" />
+              <span data-i18n="minimapHint"></span>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2 data-i18n="completion"></h2>
+          <div class="setting">
+            <label class="title" for="completion" data-i18n="trigger"></label>
+            <select id="completion" name="completion">
+              <option value="auto" data-i18n="triggerAuto"></option>
+              <option value="manual" data-i18n="triggerManual"></option>
+              <option value="off" data-i18n="triggerOff"></option>
+            </select>
+          </div>
+          <div class="setting">
+            <div class="title" data-i18n="closeTags"></div>
+            <label class="check">
+              <input type="checkbox" name="closeTags" />
+              <span data-i18n="closeTagsHint"></span>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2 data-i18n="saving"></h2>
+          <div class="setting">
+            <label class="title" for="saveTimeout" data-i18n="saveTimeout"></label>
+            <p class="description" data-i18n="saveTimeoutHint"></p>
+            <input id="saveTimeout" type="number" name="saveTimeout" min="0" max="600" step="1" />
+          </div>
+        </section>
+      </form>
+
+      <footer>
+        <button type="button" id="reset" data-i18n="reset"></button>
+        <span id="status" aria-live="polite"></span>
+      </footer>
+    </main>
+    <script type="module" src="/src/options/index.ts"></script>
+  </body>
+</html>

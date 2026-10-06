@@ -1,0 +1,40 @@
+{
+  "name": "wikidot-monaco",
+  "displayName": "Wikidot Monaco",
+  "version": "0.0.3",
+  "author": "**",
+  "description": "Replaces the wikidot source editor with Monaco, with completion for wikidot syntax.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "chrome-extension",
+    "wikidot",
+    "monaco-editor"
+  ],
+  "scripts": {
+    "dev": "node scripts/build.mjs --watch",
+    "dev:firefox": "node scripts/build.mjs --target=firefox --watch",
+    "build": "tsc && node scripts/build.mjs",
+    "build:firefox": "tsc && node scripts/build.mjs --target=firefox",
+    "fmt": "prettier --write '**/*.{ts,mjs,json,css,html,md}'",
+    "zip": "npm run build && node scripts/zip.mjs",
+    "crx": "npm run build && node scripts/crx.mjs",
+    "run:firefox": "web-ext run -s build-firefox",
+    "lint:firefox": "npm run build:firefox && web-ext lint -s build-firefox",
+    "zip:firefox": "npm run build:firefox && web-ext build -s build-firefox -a package -n wikidot-monaco-{version}-firefox.zip --overwrite-dest",
+    "sign:firefox": "npm run build:firefox && node scripts/source.mjs && web-ext sign -s build-firefox -a package --channel=unlisted --upload-source-code package/wikidot-monaco-$npm_package_version-source.zip"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.246",
+    "crx3": "^2.0.0",
+    "gulp": "^5.0.0",
+    "gulp-zip": "^6.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.4.10",
+    "web-ext": "^10.7.0"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.57.0"
+  }
+}

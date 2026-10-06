@@ -1,0 +1,9 @@
+{
+  "locale": {
+    "message": "en",
+    "description": "UI locale of the extension, read by uiLocale() in src/i18n.ts."
+  },
+  "description": {
+    "message": "Replaces the wikidot source editor with Monaco, with completion for wikidot syntax."
+  }
+}

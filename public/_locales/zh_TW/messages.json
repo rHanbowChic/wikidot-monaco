@@ -1,0 +1,9 @@
+{
+  "locale": {
+    "message": "zh",
+    "description": "UI locale of the extension, read by uiLocale() in src/i18n.ts."
+  },
+  "description": {
+    "message": "用 Monaco 替换 wikidot 的源码编辑框，并提供 wikidot 语法补全。"
+  }
+}
