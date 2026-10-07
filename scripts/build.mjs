@@ -93,7 +93,7 @@ function toFirefox(manifest) {
   manifest.background = { scripts: [manifest.background.service_worker] }
   manifest.browser_specific_settings = {
     gecko: {
-      id: 'wikidot-monaco@ect.fyi',
+      id: 'wikidot-monaco-editor@ect.fyi',
       strict_min_version: '128.0',
       data_collection_permissions: { required: ['none'] },
     },

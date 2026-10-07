@@ -37,7 +37,7 @@ npm run zip:firefox    # 构建并打包到 package/（未签名）
 npm run sign:firefox   # 构建、打包源码，并交给 AMO 签名，签好的 .xpi 保存到 package/
 ```
 
-需要 Firefox 128+（页面环境内容脚本）。源码与 Chrome 版相同，只有 manifest 在构建时转换（见 `scripts/build.mjs` 的 `toFirefox`）：`background.service_worker` 换成 `background.scripts`，并加上 `browser_specific_settings.gecko`（扩展 ID `wikidot-monaco@ect.fyi`，上架后不可更改）。
+需要 Firefox 128+（页面环境内容脚本）。源码与 Chrome 版相同，只有 manifest 在构建时转换（见 `scripts/build.mjs` 的 `toFirefox`）：`background.service_worker` 换成 `background.scripts`，并加上 `browser_specific_settings.gecko`（扩展 ID `wikidot-monaco-editor@ect.fyi`，上架后不可更改）。
 
 也可以在 `about:debugging#/runtime/this-firefox` 选择「临时载入附加组件」并指向 `build-firefox/manifest.json`。
 
