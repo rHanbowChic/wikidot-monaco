@@ -2,6 +2,7 @@
 // Watches for wikidot editor textareas and source views, and loads Monaco only when one appears.
 import { setLocale } from '../i18n'
 import { DEFAULT_SETTINGS, EVENT_READY, EVENT_SETTINGS, type SettingsMessage } from '../settings'
+import { installRevisionTagging } from './revisions'
 import { installTimeout } from './timeout'
 
 type EditorModule = typeof import('../editor')
@@ -71,8 +72,9 @@ window.addEventListener(EVENT_SETTINGS, (event) => {
 window.dispatchEvent(new CustomEvent(EVENT_READY))
 
 // init.combined.js is a blocking script in <head>, so YAHOO exists by DOMContentLoaded.
-document.addEventListener('DOMContentLoaded', () =>
-  installTimeout(() => (message?.settings ?? DEFAULT_SETTINGS).saveTimeout),
-)
+document.addEventListener('DOMContentLoaded', () => {
+  installTimeout(() => (message?.settings ?? DEFAULT_SETTINGS).saveTimeout)
+  installRevisionTagging()
+})
 
 new MutationObserver(queueScan).observe(document, { childList: true, subtree: true })

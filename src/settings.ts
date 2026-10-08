@@ -2,6 +2,7 @@ import type { Locale } from './i18n'
 
 export type CompletionMode = 'auto' | 'manual' | 'off'
 export type ThemeMode = 'auto' | 'light' | 'dark'
+export type DiffView = 'sideBySide' | 'inline'
 
 export interface Settings {
   /** Replace the wikidot textarea with Monaco. */
@@ -14,6 +15,8 @@ export interface Settings {
   fontSize: number
   wordWrap: boolean
   minimap: boolean
+  /** How revision diffs (page history) are shown. */
+  diffView: DiffView
   /** Seconds before a hanging wikidot save (or other ajax action) is given up; 0: never. */
   saveTimeout: number
 }
@@ -26,6 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   fontSize: 14,
   wordWrap: true,
   minimap: false,
+  diffView: 'sideBySide',
   saveTimeout: 30,
 }
 

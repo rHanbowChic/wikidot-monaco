@@ -3,6 +3,7 @@
 // ([[code type="..."]], [[html]], [[module CSS]]).
 import 'monaco-editor/editor/browser/coreCommands'
 import 'monaco-editor/editor/browser/widget/codeEditor/codeEditorWidget'
+import 'monaco-editor/editor/browser/widget/diffEditor/diffEditor.contribution'
 import 'monaco-editor/features/codicon/register'
 import 'monaco-editor/editor/contrib/bracketMatching/browser/bracketMatching'
 import 'monaco-editor/editor/contrib/caretOperations/browser/caretOperations'

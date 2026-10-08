@@ -51,6 +51,7 @@ function read(): Settings {
     fontSize: number(get('fontSize'), DEFAULT_SETTINGS.fontSize),
     wordWrap: get('wordWrap').checked,
     minimap: get('minimap').checked,
+    diffView: get('diffView').value as Settings['diffView'],
     saveTimeout: number(get('saveTimeout'), DEFAULT_SETTINGS.saveTimeout),
   }
 }

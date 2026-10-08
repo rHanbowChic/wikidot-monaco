@@ -4,15 +4,19 @@ import { setLocale, type Locale } from '../i18n'
 import type { Settings } from '../settings'
 import { monaco } from './monaco'
 import './style.css'
+import { FROM_REVISION, TO_REVISION } from '../content/revisions'
 import { readPageSource } from './pageSource'
+import { fetchRevisionSource } from './revisions'
 import { bindTextarea, type TextareaBinding } from './textarea'
 import { completionOptions } from './wikidot/completion'
 import { LANGUAGE_ID, registerWikidot } from './wikidot/language'
 
 interface Instance {
-  editor: monaco.editor.IStandaloneCodeEditor
+  editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IStandaloneDiffEditor
   /** Set for editable textareas; read-only source viewers have none. */
   binding?: TextareaBinding
+  /** Reapplies the current settings. */
+  configure(): void
   dispose(): void
 }
 
@@ -45,15 +49,52 @@ export function configure(next: Settings, locale: Locale) {
   completionOptions.closeTags = next.closeTags
   registerWikidot()
   applyTheme()
-  for (const { editor, binding } of instances.values()) {
-    const options = editorOptions()
-    // Viewers never suggest.
-    editor.updateOptions(
-      binding
-        ? options
-        : { ...options, quickSuggestions: false, suggestOnTriggerCharacters: false },
-    )
+  for (const instance of instances.values()) instance.configure()
+}
+
+/** Options shared by the read-only viewers; they never suggest. */
+const VIEWER_OPTIONS: monaco.editor.IEditorOptions = {
+  readOnly: true,
+  domReadOnly: true,
+  renderLineHighlight: 'none',
+  quickSuggestions: false,
+  suggestOnTriggerCharacters: false,
+}
+
+function viewerOptions(): monaco.editor.IEditorOptions {
+  return { ...editorOptions(), quickSuggestions: false, suggestOnTriggerCharacters: false }
+}
+
+const BASE_OPTIONS: monaco.editor.IEditorOptions = {
+  automaticLayout: true,
+  fixedOverflowWidgets: true,
+  scrollBeyondLastLine: false,
+  // Every tag starts with `[[`; rainbow brackets would drown out tag highlighting.
+  bracketPairColorization: { enabled: false },
+}
+
+/** Hides `element` and puts an empty wrapper for an editor in its place. */
+function cover(element: HTMLElement, height: number) {
+  const wrapper = document.createElement('div')
+  wrapper.className = 'wikidot-monaco'
+  wrapper.style.width = element.style.width || '100%'
+  wrapper.style.height = `${height}px`
+  element.after(wrapper)
+  const previousDisplay = element.style.display
+  element.style.display = 'none'
+  const uncover = () => {
+    wrapper.remove()
+    element.style.display = previousDisplay
+    instances.delete(element)
   }
+  return { wrapper, uncover }
+}
+
+function createModel(value: string) {
+  const model = monaco.editor.createModel(value, LANGUAGE_ID)
+  model.setEOL(monaco.editor.EndOfLineSequence.LF)
+  model.updateOptions({ tabSize: 4 })
+  return model
 }
 
 /** Hides `element` and mounts a Monaco editor in its place. */
@@ -63,32 +104,18 @@ function mount(
   height: number,
   options: monaco.editor.IStandaloneEditorConstructionOptions,
 ) {
-  const wrapper = document.createElement('div')
-  wrapper.className = 'wikidot-monaco'
-  wrapper.style.width = element.style.width || '100%'
-  wrapper.style.height = `${height}px`
-  element.after(wrapper)
-  const previousDisplay = element.style.display
-  element.style.display = 'none'
-
-  const model = monaco.editor.createModel(value, LANGUAGE_ID)
-  model.setEOL(monaco.editor.EndOfLineSequence.LF)
+  const { wrapper, uncover } = cover(element, height)
+  const model = createModel(value)
   const editor = monaco.editor.create(wrapper, {
     model,
-    automaticLayout: true,
-    fixedOverflowWidgets: true,
-    scrollBeyondLastLine: false,
-    // Every tag starts with `[[`; rainbow brackets would drown out tag highlighting.
-    bracketPairColorization: { enabled: false },
+    ...BASE_OPTIONS,
     ...options,
     ...editorOptions(),
   })
   const unmount = () => {
     editor.dispose()
     model.dispose()
-    wrapper.remove()
-    element.style.display = previousDisplay
-    instances.delete(element)
+    uncover()
   }
   return { editor, wrapper, unmount }
 }
@@ -113,6 +140,7 @@ export function attach(textarea: HTMLTextAreaElement) {
   instances.set(textarea, {
     editor,
     binding,
+    configure: () => editor.updateOptions(editorOptions()),
     dispose() {
       binding.dispose()
       unmount()
@@ -122,29 +150,100 @@ export function attach(textarea: HTMLTextAreaElement) {
 
 const VIEWER_MIN_HEIGHT = 120
 
-/** Shows a `div.page-source` in a read-only editor; the div stays in the page, hidden. */
+/** Sizes a viewer's wrapper to fit `contentHeight`, up to most of the viewport. */
+function fitViewer(wrapper: HTMLElement, contentHeight: number) {
+  const max = Math.max(VIEWER_MIN_HEIGHT, Math.round(window.innerHeight * 0.75))
+  wrapper.style.height = `${Math.min(Math.max(contentHeight + 2, VIEWER_MIN_HEIGHT), max)}px`
+}
+
+/**
+ * Shows a `div.page-source` in a read-only editor, or a revision diff (`div.inline-diff`)
+ * in a diff editor; the div stays in the page, hidden.
+ */
 export function attachViewer(div: HTMLElement) {
   if (instances.has(div)) return
-  const { editor, wrapper, unmount } = mount(div, readPageSource(div), VIEWER_MIN_HEIGHT, {
-    readOnly: true,
-    domReadOnly: true,
-    tabSize: 4,
-    renderLineHighlight: 'none',
-    quickSuggestions: false,
-    suggestOnTriggerCharacters: false,
-  })
-  // Fit the content, up to most of the viewport; the wrapper stays user-resizable.
-  const fit = () => {
-    const max = Math.max(VIEWER_MIN_HEIGHT, Math.round(window.innerHeight * 0.75))
-    wrapper.style.height = `${Math.min(Math.max(editor.getContentHeight() + 2, VIEWER_MIN_HEIGHT), max)}px`
-  }
+  if (div.classList.contains('inline-diff')) return attachDiff(div)
+  const { editor, wrapper, unmount } = mount(
+    div,
+    readPageSource(div),
+    VIEWER_MIN_HEIGHT,
+    VIEWER_OPTIONS,
+  )
+  // The wrapper stays user-resizable.
+  const fit = () => fitViewer(wrapper, editor.getContentHeight())
   fit()
   const sizeListener = editor.onDidContentSizeChange((e) => e.contentHeightChanged && fit())
   instances.set(div, {
     editor,
+    configure: () => editor.updateOptions(viewerOptions()),
     dispose() {
       sizeListener.dispose()
       unmount()
+    },
+  })
+}
+
+function diffOptions(): monaco.editor.IDiffEditorOptions {
+  return { ...viewerOptions(), renderSideBySide: settings.diffView === 'sideBySide' }
+}
+
+/** Replaces wikidot's inline diff of two revisions with a side-by-side or inline diff editor. */
+function attachDiff(div: HTMLElement) {
+  const { wrapper, uncover } = cover(div, VIEWER_MIN_HEIGHT)
+  const editor = monaco.editor.createDiffEditor(wrapper, {
+    ...BASE_OPTIONS,
+    ...VIEWER_OPTIONS,
+    originalEditable: false,
+    // Fold the unchanged parts of long pages around the changes.
+    hideUnchangedRegions: { enabled: true },
+    // The view is a setting; don't switch to inline in wikidot's narrow content column.
+    useInlineViewWhenSpaceIsLimited: false,
+    ...diffOptions(),
+  })
+  let models: monaco.editor.ITextModel[] = []
+  let disposed = false
+  const show = (before: string, after: string) => {
+    if (disposed) return
+    models = [createModel(before), createModel(after)]
+    editor.setModel({ original: models[0], modified: models[1] })
+  }
+  // wikidot's diff HTML loses line breaks around whole deleted or inserted lines; prefer the
+  // exact sources of both revisions and fall back to the HTML.
+  const fromHtml = () => show(readPageSource(div, 'INS'), readPageSource(div, 'DEL'))
+  const from = div.getAttribute(FROM_REVISION)
+  const to = div.getAttribute(TO_REVISION)
+  if (from && to) {
+    Promise.all([fetchRevisionSource(from), fetchRevisionSource(to)]).then(
+      ([before, after]) => show(before, after),
+      (error) => {
+        console.warn('[wikidot-monaco] failed to load revisions', error)
+        fromHtml()
+      },
+    )
+  } else fromHtml()
+  // In side-by-side view both sides are padded to the same height; inline, the modified
+  // side also holds the deleted lines.
+  const fit = () =>
+    fitViewer(
+      wrapper,
+      Math.max(
+        editor.getOriginalEditor().getContentHeight(),
+        editor.getModifiedEditor().getContentHeight(),
+      ),
+    )
+  fit()
+  const sizeListeners = [editor.getOriginalEditor(), editor.getModifiedEditor()].map((side) =>
+    side.onDidContentSizeChange((e) => e.contentHeightChanged && fit()),
+  )
+  instances.set(div, {
+    editor,
+    configure: () => editor.updateOptions(diffOptions()),
+    dispose() {
+      disposed = true
+      for (const listener of sizeListeners) listener.dispose()
+      editor.dispose()
+      for (const model of models) model.dispose()
+      uncover()
     },
   })
 }

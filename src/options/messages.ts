@@ -24,6 +24,13 @@ export const MESSAGES = {
     'Show an overview of the whole text on the right side of the editor.',
     '在编辑器右侧显示全文缩略图。',
   ),
+  diffView: t('Revision changes', '源代码变更'),
+  diffViewHint: t(
+    'How changes are shown when comparing revisions in the page history.',
+    '在页面历史中比较版本时，改动的显示方式。',
+  ),
+  diffSideBySide: t('Side by side', '左右对比'),
+  diffInline: t('Inline', '内联'),
   completion: t('Autocomplete', '自动补全'),
   trigger: t('Show suggestions', '显示补全'),
   triggerAuto: t('While typing', '输入时'),
