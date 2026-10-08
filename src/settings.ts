@@ -13,6 +13,8 @@ export interface Settings {
   closeTags: boolean
   theme: ThemeMode
   fontSize: number
+  /** Line height as a multiple of the font size. */
+  lineHeight: number
   wordWrap: boolean
   minimap: boolean
   /** How revision diffs (page history) are shown. */
@@ -27,6 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   closeTags: true,
   theme: 'auto',
   fontSize: 14,
+  lineHeight: 1.5,
   wordWrap: true,
   minimap: false,
   diffView: 'sideBySide',

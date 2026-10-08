@@ -34,9 +34,11 @@ function render(settings: Settings) {
   }
 }
 
-/** The field's value clamped to its min/max, or the default when it is not a number. */
+/** The field's value rounded to its step and clamped to its min/max, or the default when it is not a number. */
 function number(field: HTMLInputElement, fallback: number) {
-  const value = Math.round(Number(field.value))
+  const step = Number(field.step) || 1
+  // toFixed drops the float error of e.g. 15 * 0.1.
+  const value = Number((Math.round(Number(field.value) / step) * step).toFixed(2))
   if (field.value === '' || !Number.isFinite(value)) return fallback
   return Math.min(Math.max(value, Number(field.min)), Number(field.max))
 }
@@ -49,6 +51,7 @@ function read(): Settings {
     closeTags: get('closeTags').checked,
     theme: get('theme').value as Settings['theme'],
     fontSize: number(get('fontSize'), DEFAULT_SETTINGS.fontSize),
+    lineHeight: number(get('lineHeight'), DEFAULT_SETTINGS.lineHeight),
     wordWrap: get('wordWrap').checked,
     minimap: get('minimap').checked,
     diffView: get('diffView').value as Settings['diffView'],

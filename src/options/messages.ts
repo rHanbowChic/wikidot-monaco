@@ -14,6 +14,8 @@ export const MESSAGES = {
   themeLight: t('Light', '浅色'),
   themeDark: t('Dark', '深色'),
   fontSize: t('Font size', '字号'),
+  lineHeight: t('Line height', '行高'),
+  lineHeightHint: t('A multiple of the font size.', '字号的倍数。'),
   wordWrap: t('Word wrap', '自动换行'),
   wordWrapHint: t(
     'Show long lines on several lines. The source text is not changed.',

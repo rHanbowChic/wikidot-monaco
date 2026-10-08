@@ -33,8 +33,13 @@ darkQuery.addEventListener('change', () => settings && applyTheme())
 
 function editorOptions(): monaco.editor.IEditorOptions {
   const auto = settings.completion === 'auto'
+  // Half a line of space above the first line and below the last.
+  const padding = Math.round((settings.fontSize * settings.lineHeight) / 2)
   return {
     fontSize: settings.fontSize,
+    // Monaco reads values below 8 as a multiple of the font size.
+    lineHeight: settings.lineHeight,
+    padding: { top: padding, bottom: padding },
     wordWrap: settings.wordWrap ? 'on' : 'off',
     minimap: { enabled: settings.minimap },
     quickSuggestions: auto ? { other: 'on', comments: 'off', strings: 'on' } : false,
