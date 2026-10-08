@@ -59,8 +59,9 @@ const tokenizer: monaco.languages.IMonarchLanguage = {
           { token: 'delimiter.tag', next: '@embedded_html', nextEmbedded: 'html' },
         ],
       ],
+      // Module names are case-insensitive; Monarch ignores per-rule regex flags.
       [
-        /(\[\[)(module)(\s+)(CSS)(?=[\s\]])/,
+        /(\[\[)(module)(\s+)([cC][sS][sS])(?=[\s\]])/,
         ['delimiter.tag', 'tag', '', { token: 'type', next: '@moduleCss' }],
       ],
       [
