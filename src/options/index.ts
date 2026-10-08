@@ -54,6 +54,7 @@ function read(): Settings {
     lineHeight: number(get('lineHeight'), DEFAULT_SETTINGS.lineHeight),
     wordWrap: get('wordWrap').checked,
     minimap: get('minimap').checked,
+    lineNumbers: get('lineNumbers').checked,
     diffView: get('diffView').value as Settings['diffView'],
     saveTimeout: number(get('saveTimeout'), DEFAULT_SETTINGS.saveTimeout),
   }

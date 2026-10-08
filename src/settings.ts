@@ -17,6 +17,7 @@ export interface Settings {
   lineHeight: number
   wordWrap: boolean
   minimap: boolean
+  lineNumbers: boolean
   /** How revision diffs (page history) are shown. */
   diffView: DiffView
   /** Seconds before a hanging wikidot save (or other ajax action) is given up; 0: never. */
@@ -32,6 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lineHeight: 1.5,
   wordWrap: true,
   minimap: false,
+  lineNumbers: true,
   diffView: 'sideBySide',
   saveTimeout: 30,
 }

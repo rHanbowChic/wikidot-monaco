@@ -42,6 +42,7 @@ function editorOptions(): monaco.editor.IEditorOptions {
     padding: { top: padding, bottom: padding },
     wordWrap: settings.wordWrap ? 'on' : 'off',
     minimap: { enabled: settings.minimap },
+    lineNumbers: settings.lineNumbers ? 'on' : 'off',
     quickSuggestions: auto ? { other: 'on', comments: 'off', strings: 'on' } : false,
     suggestOnTriggerCharacters: auto,
   }

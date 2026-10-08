@@ -21,6 +21,8 @@ export const MESSAGES = {
     'Show long lines on several lines. The source text is not changed.',
     '长行折到下一行显示，不会改动源码。',
   ),
+  lineNumbers: t('Line numbers', '行号'),
+  lineNumbersHint: t('Show line numbers on the left side of the editor.', '在编辑器左侧显示行号。'),
   minimap: t('Minimap', '缩略图'),
   minimapHint: t(
     'Show an overview of the whole text on the right side of the editor.',
