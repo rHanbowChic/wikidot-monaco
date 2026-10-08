@@ -1,6 +1,7 @@
 import { monaco } from '../monaco'
 import { registerCompletion } from './completion'
 import { registerHover } from './hover'
+import { registerLinks } from './links'
 import { scanTags } from './scan'
 
 export const LANGUAGE_ID = 'wikidot'
@@ -268,5 +269,6 @@ export function registerWikidot() {
   monaco.languages.registerFoldingRangeProvider(LANGUAGE_ID, foldingProvider)
   registerCompletion(LANGUAGE_ID)
   registerHover(LANGUAGE_ID)
+  registerLinks(LANGUAGE_ID)
   defineThemes()
 }
