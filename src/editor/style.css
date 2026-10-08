@@ -18,6 +18,16 @@
 }
 
 /*
+ * Monaco's widgets (hover, command palette, find) take their shadow from --vscode-shadow-*,
+ * which only VS Code's workbench defines, so they render without one. Define them from the
+ * theme's widget shadow color, which Monaco sets on .monaco-editor.
+ */
+.wikidot-monaco .monaco-editor {
+  --vscode-shadow-lg: 0 2px 8px var(--vscode-widget-shadow);
+  --vscode-shadow-xl: 0 0 8px 2px var(--vscode-widget-shadow);
+}
+
+/*
  * The context menu lives in a shadow root outside .monaco-editor, where the theme's
  * color variables are not defined, so it renders transparent. Custom properties do
  * inherit into shadow trees, so define the menu colors on the shadow host only:
