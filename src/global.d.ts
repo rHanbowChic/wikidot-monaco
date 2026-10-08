@@ -32,4 +32,8 @@ declare module 'monaco-editor/languages/features/common/lspLanguageFeatures' {
     constructor(worker: (...uris: unknown[]) => Promise<unknown>, triggerCharacters: string[])
     provideCompletionItems: languages.CompletionItemProvider['provideCompletionItems']
   }
+  export class HoverAdapter implements languages.HoverProvider {
+    constructor(worker: (...uris: unknown[]) => Promise<unknown>)
+    provideHover: languages.HoverProvider['provideHover']
+  }
 }

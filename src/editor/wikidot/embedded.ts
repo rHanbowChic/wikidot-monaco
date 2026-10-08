@@ -1,12 +1,15 @@
-// CSS and HTML completion inside [[module CSS]] and [[html]] blocks, using Monaco's own
+// CSS and HTML completion and hovers inside [[module CSS]] and [[html]] blocks, using Monaco's own
 // CSS/HTML language services.
 //
 // Monaco normally runs these services in web workers loaded from the extension origin,
 // which the page cannot start, and only for whole css/html documents. Instead the worker
 // classes run on the main thread against a hidden model that holds the block's content
 // at its original line/column (everything outside the block is blanked to spaces), so
-// completion ranges need no translation.
-import { CompletionAdapter } from 'monaco-editor/languages/features/common/lspLanguageFeatures'
+// completion and hover ranges need no translation.
+import {
+  CompletionAdapter,
+  HoverAdapter,
+} from 'monaco-editor/languages/features/common/lspLanguageFeatures'
 import { CSSWorker } from 'monaco-editor/languages/features/css/cssWorker'
 import { HTMLWorker } from 'monaco-editor/languages/features/html/htmlWorker'
 import { monaco } from '../monaco'
@@ -48,7 +51,8 @@ const blank = (s: string) => s.replace(/[^\n]/g, ' ')
 
 interface Service {
   model: monaco.editor.ITextModel
-  adapter: CompletionAdapter
+  completion: CompletionAdapter
+  hover: HoverAdapter
 }
 
 const services = new Map<Language, Service>()
@@ -76,8 +80,27 @@ function service(language: Language): Service {
           languageId: 'html',
           languageSettings: { suggest: {}, data: { useDefaultDataProvider: true } },
         })
-  s = { model, adapter: new CompletionAdapter(() => Promise.resolve(worker), []) }
+  const getWorker = () => Promise.resolve(worker)
+  s = {
+    model,
+    completion: new CompletionAdapter(getWorker, []),
+    hover: new HoverAdapter(getWorker),
+  }
   services.set(language, s)
+  return s
+}
+
+/** The service for the block containing `position`, its model holding that block; or null. */
+function serviceAt(model: monaco.editor.ITextModel, position: monaco.Position) {
+  const text = model.getValue()
+  const region = regionAt(text, model.getOffsetAt(position))
+  if (!region) return null
+  const s = service(region.language)
+  s.model.setValue(
+    blank(text.slice(0, region.start)) +
+      text.slice(region.start, region.end) +
+      blank(text.slice(region.end)),
+  )
   return s
 }
 
@@ -88,14 +111,18 @@ export async function provideEmbeddedCompletions(
   context: monaco.languages.CompletionContext,
   token: monaco.CancellationToken,
 ): Promise<monaco.languages.CompletionList | null> {
-  const text = model.getValue()
-  const region = regionAt(text, model.getOffsetAt(position))
-  if (!region) return null
-  const { model: shadow, adapter } = service(region.language)
-  shadow.setValue(
-    blank(text.slice(0, region.start)) +
-      text.slice(region.start, region.end) +
-      blank(text.slice(region.end)),
-  )
-  return (await adapter.provideCompletionItems(shadow, position, context, token)) ?? null
+  const s = serviceAt(model, position)
+  if (!s) return null
+  return (await s.completion.provideCompletionItems(s.model, position, context, token)) ?? null
+}
+
+/** CSS/HTML hover when `position` is inside an embedded block, otherwise null. */
+export async function provideEmbeddedHover(
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  token: monaco.CancellationToken,
+): Promise<monaco.languages.Hover | null> {
+  const s = serviceAt(model, position)
+  if (!s) return null
+  return (await s.hover.provideHover(s.model, position, token)) ?? null
 }
