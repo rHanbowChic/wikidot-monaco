@@ -6,6 +6,7 @@ import { monaco } from './monaco'
 import './style.css'
 import { FROM_REVISION, TO_REVISION } from '../content/revisions'
 import { readPageSource } from './pageSource'
+import { chainTouchScroll } from './scrollChain'
 import { fetchRevisionSource } from './revisions'
 import { bindTextarea, type TextareaBinding } from './textarea'
 import { completionOptions } from './wikidot/completion'
@@ -92,6 +93,8 @@ const BASE_OPTIONS: monaco.editor.IEditorOptions = {
   automaticLayout: true,
   fixedOverflowWidgets: true,
   scrollBeyondLastLine: false,
+  // Let the page scroll once the editor reaches its top or bottom.
+  scrollbar: { alwaysConsumeMouseWheel: false },
   // Every tag starts with `[[`; rainbow brackets would drown out tag highlighting.
   bracketPairColorization: { enabled: false },
 }
@@ -135,7 +138,9 @@ function mount(
     ...options,
     ...editorOptions(),
   })
+  const unchain = chainTouchScroll(wrapper, () => [editor])
   const unmount = () => {
+    unchain()
     editor.dispose()
     model.dispose()
     uncover()
@@ -223,6 +228,10 @@ function attachDiff(div: HTMLElement) {
     useInlineViewWhenSpaceIsLimited: false,
     ...diffOptions(),
   })
+  const unchain = chainTouchScroll(wrapper, () => [
+    editor.getOriginalEditor(),
+    editor.getModifiedEditor(),
+  ])
   let models: monaco.editor.ITextModel[] = []
   let disposed = false
   const show = (before: string, after: string) => {
@@ -264,6 +273,7 @@ function attachDiff(div: HTMLElement) {
     dispose() {
       disposed = true
       for (const listener of sizeListeners) listener.dispose()
+      unchain()
       editor.dispose()
       for (const model of models) model.dispose()
       uncover()
