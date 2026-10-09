@@ -18,6 +18,14 @@
 }
 
 /*
+ * wikidot's -/+ buttons that resize the textarea do nothing for the editor, which is
+ * resized by dragging its corner. Hidden only while the form holds an editor.
+ */
+form:has(.wikidot-monaco) .change-textarea-size {
+  display: none;
+}
+
+/*
  * Monaco's widgets (hover, command palette, find) take their shadow from --vscode-shadow-*,
  * which only VS Code's workbench defines, so they render without one. Define them from the
  * theme's widget shadow color, which Monaco sets on .monaco-editor.
