@@ -1,5 +1,6 @@
-// Ctrl+click links for page names: `[[include page]]` / `[[include :site:page]]` and
-// `[[[page|text]]]`. Local pages open on the current site; `:site:` opens site.wikidot.com.
+// Ctrl+click links for page names: `[[include page]]` / `[[include :site:page]]`,
+// `[[[page|text]]]` and `[/path text]`. Local pages open on the current site; `:site:` opens
+// site.wikidot.com.
 // Plain URLs, including `[[[https://…|text]]]`, are already linked by Monaco.
 import { t, tr } from '../../i18n'
 import { monaco } from '../monaco'
@@ -8,6 +9,8 @@ const OPEN_PAGE = t('Open page', '打开页面')
 
 const INCLUDE = /\[\[include\s+([^\s|\]]+)/gi
 const PAGE_LINK = /\[\[\[([^\]|\n]+)(?:\|[^\]\n]*)?\]\]\]/g
+// `[/path text]`, also with `*` before the path; not the `[/div]` inside `[[/div]]`.
+const PATH_LINK = /(?<!\[)\[\*?(\/[^\s\]]*)[^\]\n]*\](?!\])/g
 const CROSS_SITE = /^:([\w-]+):(.+)$/
 const URL_SCHEME = /^[a-z][\w+.-]*:\/\//i
 
@@ -70,6 +73,9 @@ export function registerLinks(languageId: string) {
         add(m.index + m[0].length - m[1].length, m[1].length, includeUrl(m[1]))
       }
       for (const m of text.matchAll(PAGE_LINK)) add(m.index + 3, m[1].length, linkUrl(m[1]))
+      for (const m of text.matchAll(PATH_LINK)) {
+        add(m.index + m[0].indexOf('/'), m[1].length, new URL(m[1], location.href).href)
+      }
       return { links }
     },
   })
