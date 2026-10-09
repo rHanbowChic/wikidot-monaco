@@ -17,13 +17,21 @@ const watch = process.argv.includes('--watch')
 const firefox = process.argv.includes('--target=firefox')
 const outDir = resolve(root, firefox ? 'build-firefox' : 'build')
 
+const monacoPkg = JSON.parse(
+  await readFile(resolve(root, 'node_modules/monaco-editor/package.json'), 'utf8'),
+)
+
 const base = (overrides) => ({
   root,
   configFile: false,
   logLevel: 'warn',
   publicDir: false,
   base: './',
-  define: { 'process.env.NODE_ENV': '"production"' },
+  define: {
+    'process.env.NODE_ENV': '"production"',
+    // Shown on the settings page's About section.
+    __MONACO_VERSION__: JSON.stringify(monacoPkg.version),
+  },
   ...overrides,
   build: {
     outDir,

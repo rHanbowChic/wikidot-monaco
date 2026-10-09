@@ -10,6 +10,13 @@ export const MESSAGES = {
   general: t('General', '常规'),
   appearance: t('Appearance', '外观'),
   history: t('Page history', '页面历史'),
+  about: t('About', '关于'),
+  aboutVersion: t('Version', '版本'),
+  aboutMonaco: t('Monaco Editor', 'Monaco 编辑器'),
+  aboutLicense: t('License', '许可证'),
+  aboutGitHub: t('Project on GitHub', 'GitHub 项目'),
+  aboutChangelog: t('Changelog', '更新日志'),
+  aboutIssues: t('Report a problem', '反馈问题'),
   enabled: t('Enable', '启用'),
   enabledHint: t(
     'Use an editor with syntax highlighting instead of the plain text box when editing pages, posting, and viewing source.',

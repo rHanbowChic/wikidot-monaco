@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** Version of the bundled monaco-editor package, defined by scripts/build.mjs. */
+declare const __MONACO_VERSION__: string
+
 // Monaco's CSS/HTML language services, used directly on the main thread (see
 // src/editor/wikidot/embedded.ts). These internal modules ship without typings.
 interface MonacoMirrorModel {

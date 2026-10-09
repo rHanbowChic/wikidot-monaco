@@ -32,6 +32,7 @@
             <li><a href="#appearance" data-i18n="appearance"></a></li>
             <li><a href="#completion" data-i18n="completion"></a></li>
             <li><a href="#history" data-i18n="history"></a></li>
+            <li><a href="#about" data-i18n="about"></a></li>
           </ul>
         </nav>
 
@@ -134,7 +135,53 @@
             </section>
           </form>
 
-          <footer>
+          <!-- Outside the form: nothing here is a setting. -->
+          <section data-category="about" aria-labelledby="about-title">
+            <h2 id="about-title" data-i18n="about"></h2>
+            <div class="about-head">
+              <img src="/icons/logo.svg" alt="" width="56" height="56" />
+              <div>
+                <div class="about-name">Wikidot Monaco</div>
+                <p class="description" id="about-description"></p>
+              </div>
+            </div>
+            <dl class="about-info">
+              <dt data-i18n="aboutVersion"></dt>
+              <dd id="version-extension"></dd>
+              <dt data-i18n="aboutMonaco"></dt>
+              <dd id="version-monaco"></dd>
+              <dt data-i18n="aboutLicense"></dt>
+              <dd>MIT</dd>
+            </dl>
+            <ul class="about-links">
+              <li>
+                <a
+                  href="https://github.com/rHanbowChic/wikidot-monaco"
+                  target="_blank"
+                  rel="noopener"
+                  data-i18n="aboutGitHub"
+                ></a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/rHanbowChic/wikidot-monaco/blob/main/CHANGELOG.md"
+                  target="_blank"
+                  rel="noopener"
+                  data-i18n="aboutChangelog"
+                ></a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/rHanbowChic/wikidot-monaco/issues"
+                  target="_blank"
+                  rel="noopener"
+                  data-i18n="aboutIssues"
+                ></a>
+              </li>
+            </ul>
+          </section>
+
+          <footer id="footer">
             <button type="button" id="reset" data-i18n="reset"></button>
             <span id="status" aria-live="polite"></span>
             <!-- Shown in place of the reset button until the user confirms or cancels. -->

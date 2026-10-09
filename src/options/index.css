@@ -9,6 +9,7 @@
   --input-border: #cecece;
   --focus: #0090f1;
   --accent: #005fb8;
+  --link: #005fb8;
   --accent-fg: #ffffff;
   --hover: rgba(0, 0, 0, 0.04);
   --selected: rgba(0, 95, 184, 0.08);
@@ -31,6 +32,7 @@
     --input-border: #3c3c3c;
     --focus: #007fd4;
     --accent: #0078d4;
+    --link: #4daafc;
     --accent-fg: #ffffff;
     --hover: rgba(255, 255, 255, 0.04);
     --selected: rgba(0, 120, 212, 0.18);
@@ -290,6 +292,71 @@ button.danger:hover {
 
 [hidden] {
   display: none !important;
+}
+
+/* About */
+.about-head {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin: 16px 0 24px;
+}
+
+.about-head img {
+  flex: none;
+}
+
+.about-name {
+  color: var(--fg-strong);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.about-head .description {
+  margin: 2px 0 0;
+}
+
+.about-info {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 32px;
+  margin: 0 0 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.about-info dt {
+  color: var(--muted);
+}
+
+.about-info dd {
+  margin: 0;
+  color: var(--fg-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-links a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.about-links a:hover {
+  text-decoration: underline;
+}
+
+.about-links a:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* Narrow screens: one column, the menu folds behind a toggle showing the current category. */

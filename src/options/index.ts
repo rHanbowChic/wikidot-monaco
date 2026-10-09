@@ -31,6 +31,13 @@ const navCurrent = document.getElementById('nav-current')!
 const sections = [...document.querySelectorAll<HTMLElement>('section[data-category]')]
 const links = [...nav.querySelectorAll<HTMLAnchorElement>('#nav-list a')]
 
+const footer = document.getElementById('footer')!
+
+// About: versions of this build and of the bundled Monaco.
+document.getElementById('version-extension')!.textContent = chrome.runtime.getManifest().version
+document.getElementById('version-monaco')!.textContent = __MONACO_VERSION__
+document.getElementById('about-description')!.textContent = chrome.i18n.getMessage('description')
+
 function setMenuOpen(open: boolean) {
   nav.classList.toggle('open', open)
   navToggle.setAttribute('aria-expanded', String(open))
@@ -39,6 +46,8 @@ function setMenuOpen(open: boolean) {
 function showCategory(name: string) {
   const current = sections.find((s) => s.dataset.category === name) ?? sections[0]
   for (const section of sections) section.hidden = section !== current
+  // Restoring defaults has nothing to do with About.
+  footer.hidden = current.dataset.category === 'about'
   for (const link of links) {
     const selected = link.hash === `#${current.dataset.category}`
     if (selected) {
