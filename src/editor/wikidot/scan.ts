@@ -12,8 +12,11 @@ const BODY_MODULES = new Set(MODULES.filter((m) => m.body).map((m) => m.name.toL
 const MODULE_NAME = /\s+(\w+)/y
 const TOKEN = /\[!--|@@|@<|\[\[\[|\[\[(\/?)(==|[<>=]|[a-zA-Z][\w-]*)(?=[\s\]])/g
 
-/** Finds paired block tags (`[[div]]`, `[[/div]]`, …), skipping comments and raw text. */
-export function scanTags(text: string): TagToken[] {
+/**
+ * Finds paired block tags (`[[div]]`, `[[/div]]`, …), skipping comments and raw text. `raw`
+ * tells whether `text` ends inside a comment, a literal or a raw block such as `[[code]]`.
+ */
+export function scan(text: string): { tags: TagToken[]; raw: boolean } {
   const tags: TagToken[] = []
   TOKEN.lastIndex = 0
   let m: RegExpExecArray | null
@@ -24,7 +27,7 @@ export function scanTags(text: string): TagToken[] {
         token === '[!--' ? '--]' : token === '@@' ? '@@' : '>@',
         TOKEN.lastIndex,
       )
-      if (end < 0) break
+      if (end < 0) return { tags, raw: true }
       TOKEN.lastIndex = end + (token === '@@' ? 2 : 3)
       continue
     }
@@ -41,11 +44,15 @@ export function scanTags(text: string): TagToken[] {
     tags.push({ name, closing, start: m.index })
     if (!closing && RAW_BLOCKS.has(name)) {
       const end = text.indexOf(`[[/${name}]]`, TOKEN.lastIndex)
-      if (end < 0) break
+      if (end < 0) return { tags, raw: true }
       TOKEN.lastIndex = end
     }
   }
-  return tags
+  return { tags, raw: false }
+}
+
+export function scanTags(text: string): TagToken[] {
+  return scan(text).tags
 }
 
 /** Names of tags still open at the end of `text`, innermost last. */

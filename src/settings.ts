@@ -11,6 +11,8 @@ export interface Settings {
   completion: CompletionMode
   /** Insert the matching [[/tag]] when completing a block tag. */
   closeTags: boolean
+  /** Enter around `[[tags]]` adds closing tags and indents, and new lines keep their indentation. */
+  tagEnter: boolean
   theme: ThemeMode
   fontSize: number
   /** Line height as a multiple of the font size. */
@@ -28,6 +30,7 @@ export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   completion: 'auto',
   closeTags: true,
+  tagEnter: false,
   theme: 'auto',
   fontSize: 14,
   lineHeight: 1.5,

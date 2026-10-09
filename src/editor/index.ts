@@ -10,6 +10,7 @@ import { chainTouchScroll } from './scrollChain'
 import { fetchRevisionSource } from './revisions'
 import { bindTextarea, type TextareaBinding } from './textarea'
 import { completionOptions } from './wikidot/completion'
+import { bindEnter } from './wikidot/enter'
 import { LANGUAGE_ID, registerWikidot } from './wikidot/language'
 
 interface Instance {
@@ -148,6 +149,13 @@ function mount(
   return { editor, wrapper, unmount }
 }
 
+/** Options of editable editors that follow the settings. */
+function textareaOptions(): monaco.editor.IEditorOptions {
+  // wikidot's own editor script handles list continuation on Enter; with tag Enter on, other
+  // lines keep their indentation, as in the body of an indented tag.
+  return { ...editorOptions(), autoIndent: settings.tagEnter ? 'keep' : 'none' }
+}
+
 export function attach(textarea: HTMLTextAreaElement) {
   if (instances.has(textarea)) return
   const { editor, wrapper, unmount } = mount(
@@ -155,8 +163,7 @@ export function attach(textarea: HTMLTextAreaElement) {
     textarea.value,
     Math.max(textarea.offsetHeight, 320),
     {
-      // wikidot's own editor script handles list continuation on Enter.
-      autoIndent: 'none',
+      ...textareaOptions(),
       insertSpaces: false,
       tabSize: 4,
       wordBasedSuggestions: 'off',
@@ -165,11 +172,14 @@ export function attach(textarea: HTMLTextAreaElement) {
     },
   )
   const binding = bindTextarea(textarea, editor, wrapper)
+  // After the binding, so wikidot's own Enter handling comes first.
+  const enter = bindEnter(editor, wrapper, () => settings.tagEnter)
   instances.set(textarea, {
     editor,
     binding,
-    configure: () => editor.updateOptions(editorOptions()),
+    configure: () => editor.updateOptions(textareaOptions()),
     dispose() {
+      enter.dispose()
       binding.dispose()
       unmount()
     },

@@ -58,6 +58,11 @@ export const MESSAGES = {
     'Add `[[/div]]` when completing `[[div]]`.',
     '补全 `[[div]]` 时自动加上 `[[/div]]`。',
   ),
+  tagEnter: t('Enter in tags', '标签内回车'),
+  tagEnterHint: t(
+    'Enter after `[[div]]` adds `[[/div]]` and indents the line between; Enter in an unfinished tag finishes it. New lines keep the indentation of the line above.',
+    '在 `[[div]]` 后回车时自动加上 `[[/div]]`，并缩进中间的一行；在未写完的标签中回车会先补全标签。新行保持上一行的缩进。',
+  ),
   saveTimeout: t('Save timeout (seconds)', '保存超时（秒）'),
   saveTimeoutHint: t(
     'If saving a page or a post gets no response in this time, show an error so you can save again. 0 waits forever.',

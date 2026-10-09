@@ -100,6 +100,7 @@ function read(): Settings {
     enabled: get('enabled').checked,
     completion: get('completion').value as Settings['completion'],
     closeTags: get('closeTags').checked,
+    tagEnter: get('tagEnter').checked,
     theme: get('theme').value as Settings['theme'],
     fontSize: number(get('fontSize'), DEFAULT_SETTINGS.fontSize),
     lineHeight: number(get('lineHeight'), DEFAULT_SETTINGS.lineHeight),
