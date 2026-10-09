@@ -45,6 +45,10 @@ export function normalizeSettings(raw: Partial<Settings> | undefined): Settings 
 /** Events used to pass settings from the isolated world to the page (MAIN) world. */
 export const EVENT_SETTINGS = 'wikidot-monaco:settings'
 export const EVENT_READY = 'wikidot-monaco:ready'
+/** From the page world: open the settings page (only the background can). */
+export const EVENT_OPEN_OPTIONS = 'wikidot-monaco:open-options'
+/** Runtime message from the content script to the background. */
+export const MESSAGE_OPEN_OPTIONS = 'open-options'
 
 export interface SettingsMessage {
   settings: Settings

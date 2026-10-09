@@ -1,7 +1,7 @@
 // Lazily loaded into the page (MAIN world) when a wikidot editor textarea or a
 // `div.page-source` appears.
-import { setLocale, type Locale } from '../i18n'
-import type { Settings } from '../settings'
+import { setLocale, t, tr, type Locale } from '../i18n'
+import { EVENT_OPEN_OPTIONS, type Settings } from '../settings'
 import { monaco } from './monaco'
 import './style.css'
 import { FROM_REVISION, TO_REVISION } from '../content/revisions'
@@ -48,12 +48,29 @@ function editorOptions(): monaco.editor.IEditorOptions {
   }
 }
 
+const OPEN_SETTINGS = t('Wikidot Monaco Settings', 'Wikidot Monaco 设置')
+let settingsAction: monaco.IDisposable | undefined
+
+/** Context menu item of every editor that opens the extension's settings page. */
+function registerSettingsAction() {
+  // Re-registered so the label follows the UI language.
+  settingsAction?.dispose()
+  settingsAction = monaco.editor.addEditorAction({
+    id: 'wikidot-monaco.openSettings',
+    label: tr(OPEN_SETTINGS),
+    contextMenuGroupId: 'z_settings',
+    // The page cannot open extension pages; the content script relays to the background.
+    run: () => void window.dispatchEvent(new CustomEvent(EVENT_OPEN_OPTIONS)),
+  })
+}
+
 export function configure(next: Settings, locale: Locale) {
   settings = next
   setLocale(locale)
   completionOptions.mode = next.completion
   completionOptions.closeTags = next.closeTags
   registerWikidot()
+  registerSettingsAction()
   applyTheme()
   for (const instance of instances.values()) instance.configure()
 }

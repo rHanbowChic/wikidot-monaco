@@ -58,6 +58,23 @@ form:has(.wikidot-monaco) .change-textarea-size {
   --vscode-strokeThickness: 1px;
   --vscode-cornerRadius-medium: 0;
   --vscode-cornerRadius-large: 0;
+  /* Same shadow as the hover; without it the menu falls back to a 12px glow. */
+  --vscode-shadow-lg: 0 2px 8px var(--vscode-widget-shadow);
+}
+
+/* Dark menu colors (VS Code's Dark Modern) when the editor uses the dark theme. */
+.wikidot-monaco:has(.monaco-editor.vs-dark) > .shadow-root-host {
+  --vscode-menu-background: #1f1f1f;
+  --vscode-menu-foreground: #cccccc;
+  --vscode-menu-border: #454545;
+  --vscode-menu-separatorBackground: #454545;
+  --vscode-list-hoverBackground: #2a2d2e;
+  --vscode-list-hoverForeground: #ffffff;
+  --vscode-disabledForeground: rgba(204, 204, 204, 0.5);
+  --vscode-widget-shadow: rgba(0, 0, 0, 0.36);
+  --vscode-scrollbarSlider-background: rgba(121, 121, 121, 0.4);
+  --vscode-scrollbarSlider-hoverBackground: rgba(100, 100, 100, 0.7);
+  --vscode-scrollbarSlider-activeBackground: rgba(191, 191, 191, 0.4);
 }
 
 /*

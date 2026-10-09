@@ -2,8 +2,10 @@
 // page world, where the editor lives (it must share the page's view of the textarea).
 import { uiLocale } from '../i18n'
 import {
+  EVENT_OPEN_OPTIONS,
   EVENT_READY,
   EVENT_SETTINGS,
+  MESSAGE_OPEN_OPTIONS,
   normalizeSettings,
   type Settings,
   type SettingsMessage,
@@ -30,6 +32,9 @@ function send(settings: Settings) {
 // Either side may load first: send once ready, and answer whenever the page side asks.
 current.then(send)
 window.addEventListener(EVENT_READY, () => current.then(send))
+
+// The editor's "Settings" menu item; only the background may open the options page.
+window.addEventListener(EVENT_OPEN_OPTIONS, () => chrome.runtime.sendMessage(MESSAGE_OPEN_OPTIONS))
 
 chrome.storage.onChanged.addListener((_changes, area) => {
   if (area !== 'sync') return
