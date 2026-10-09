@@ -58,8 +58,8 @@ export const MESSAGES = {
   ),
   reset: t('Restore defaults', '恢复默认设置'),
   resetConfirm: t(
-    'This restores **all settings in every category** to their defaults, not only the ones shown. This cannot be undone.',
-    '这会把**所有分类中的全部设置**恢复为默认值，而不只是当前显示的这些。此操作无法撤销。',
+    'This restores **all settings** to their defaults. This cannot be undone.',
+    '这会把**全部设置**恢复为默认值。此操作无法撤销。',
   ),
   resetYes: t('Restore all', '全部恢复'),
   cancel: t('Cancel', '取消'),
