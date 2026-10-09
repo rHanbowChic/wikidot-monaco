@@ -11,9 +11,12 @@
   --accent: #005fb8;
   --accent-fg: #ffffff;
   --hover: rgba(0, 0, 0, 0.04);
+  --selected: rgba(0, 95, 184, 0.08);
   --button-bg: #e5e5e5;
   --button-hover: #cccccc;
   --code-bg: rgba(0, 0, 0, 0.06);
+  --danger: #c42b1c;
+  --danger-hover: #a52316;
   color-scheme: light;
 }
 
@@ -30,9 +33,12 @@
     --accent: #0078d4;
     --accent-fg: #ffffff;
     --hover: rgba(255, 255, 255, 0.04);
+    --selected: rgba(0, 120, 212, 0.18);
     --button-bg: #313131;
     --button-hover: #3c3c3c;
     --code-bg: rgba(255, 255, 255, 0.1);
+    --danger: #c42b1c;
+    --danger-hover: #d93a2b;
     color-scheme: dark;
   }
 }
@@ -55,7 +61,7 @@ body {
 }
 
 main {
-  max-width: 760px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 40px 24px 48px;
 }
@@ -72,8 +78,53 @@ h1 {
   font-weight: 600;
 }
 
+/* Category menu on the left, the chosen category's settings on the right. */
+.layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 40px;
+  margin-top: 24px;
+}
+
+nav {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+}
+
+.nav-toggle {
+  display: none;
+}
+
+#nav-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#nav-list a {
+  display: block;
+  padding: 6px 12px;
+  border-left: 2px solid transparent;
+  color: var(--fg);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+#nav-list a:hover {
+  background: var(--hover);
+  color: var(--fg-strong);
+}
+
+#nav-list a[aria-current='page'] {
+  border-left-color: var(--accent);
+  background: var(--selected);
+  color: var(--fg-strong);
+  font-weight: 600;
+}
+
 h2 {
-  margin: 32px 0 8px;
+  margin: 0 0 8px;
   color: var(--fg-strong);
   font-size: 20px;
   font-weight: 600;
@@ -173,7 +224,8 @@ input[type='number'] {
 
 select:focus,
 input:focus-visible,
-button:focus-visible {
+button:focus-visible,
+#nav-list a:focus-visible {
   outline: 1px solid var(--focus);
   outline-offset: -1px;
 }
@@ -202,6 +254,88 @@ button:hover {
   background: var(--button-hover);
 }
 
+button.danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+button.danger:hover {
+  background: var(--danger-hover);
+}
+
 #status {
   color: var(--muted);
+}
+
+/* Reset confirmation: replaces the reset button until answered. */
+#reset-confirm {
+  /* Before the (possibly empty) status, so it lines up with the content. */
+  order: -1;
+  flex: 1;
+  padding: 12px 16px;
+  border-left: 3px solid var(--danger);
+  background: var(--hover);
+}
+
+#reset-confirm p {
+  margin: 0 0 12px;
+  color: var(--fg-strong);
+}
+
+#reset-confirm .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Narrow screens: one column, the menu folds behind a toggle showing the current category. */
+@media (max-width: 640px) {
+  main {
+    padding: 24px 16px 32px;
+  }
+
+  .layout {
+    display: block;
+    margin-top: 16px;
+  }
+
+  nav {
+    position: static;
+    margin-bottom: 20px;
+  }
+
+  .nav-toggle {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    height: 38px;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .nav-toggle svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+
+  #nav-list {
+    display: none;
+    padding: 4px 0;
+    border: 1px solid var(--line);
+    border-top: 0;
+  }
+
+  nav.open #nav-list {
+    display: block;
+  }
+
+  #nav-list a {
+    padding: 8px 14px;
+  }
 }

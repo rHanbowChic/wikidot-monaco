@@ -7,17 +7,59 @@ const locale = uiLocale()
 setLocale(locale)
 document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en'
 for (const element of document.querySelectorAll<HTMLElement>('[data-i18n]')) {
-  // Odd parts sit between backticks and become <code>.
-  const parts = tr(MESSAGES[element.dataset.i18n as MessageKey]).split('`')
+  // `code` and **bold** become <code> and <strong>; the split keeps them as their own parts.
+  const parts = tr(MESSAGES[element.dataset.i18n as MessageKey]).split(/(`[^`]*`|\*\*[^*]*\*\*)/)
   element.replaceChildren(
-    ...parts.map((part, i) => {
-      if (i % 2 === 0) return part
-      const code = document.createElement('code')
-      code.textContent = part
-      return code
+    ...parts.map((part) => {
+      const tag = part.startsWith('`') ? 'code' : part.startsWith('**') ? 'strong' : null
+      if (!tag) return part
+      const node = document.createElement(tag)
+      node.textContent = part.slice(tag === 'code' ? 1 : 2, tag === 'code' ? -1 : -2)
+      return node
     }),
   )
 }
+
+for (const element of document.querySelectorAll<HTMLElement>('[data-i18n-label]')) {
+  element.setAttribute('aria-label', tr(MESSAGES[element.dataset.i18nLabel as MessageKey]))
+}
+
+// Categories: the menu shows one section at a time, chosen by the URL hash.
+const nav = document.getElementById('nav')!
+const navToggle = nav.querySelector<HTMLButtonElement>('.nav-toggle')!
+const navCurrent = document.getElementById('nav-current')!
+const sections = [...document.querySelectorAll<HTMLElement>('section[data-category]')]
+const links = [...nav.querySelectorAll<HTMLAnchorElement>('#nav-list a')]
+
+function setMenuOpen(open: boolean) {
+  nav.classList.toggle('open', open)
+  navToggle.setAttribute('aria-expanded', String(open))
+}
+
+function showCategory(name: string) {
+  const current = sections.find((s) => s.dataset.category === name) ?? sections[0]
+  for (const section of sections) section.hidden = section !== current
+  for (const link of links) {
+    const selected = link.hash === `#${current.dataset.category}`
+    if (selected) {
+      link.setAttribute('aria-current', 'page')
+      navCurrent.textContent = link.textContent
+    } else link.removeAttribute('aria-current')
+  }
+  setMenuOpen(false)
+}
+
+showCategory(location.hash.slice(1))
+window.addEventListener('hashchange', () => showCategory(location.hash.slice(1)))
+navToggle.addEventListener('click', () => setMenuOpen(!nav.classList.contains('open')))
+// Choosing the current category changes no hash, so close the menu here too.
+for (const link of links) link.addEventListener('click', () => setMenuOpen(false))
+nav.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && nav.classList.contains('open')) {
+    setMenuOpen(false)
+    navToggle.focus()
+  }
+})
 
 const form = document.getElementById('settings') as HTMLFormElement
 const status = document.getElementById('status')!
@@ -76,7 +118,25 @@ form.addEventListener('change', () => {
   render(settings) // show clamped numbers
   save(settings)
 })
-reset.addEventListener('click', () => {
+// Restoring defaults affects every category, including hidden ones, so ask first.
+const resetConfirm = document.getElementById('reset-confirm')!
+const resetYes = document.getElementById('reset-yes')!
+const resetNo = document.getElementById('reset-no')!
+
+function setConfirming(confirming: boolean) {
+  resetConfirm.hidden = !confirming
+  reset.hidden = confirming
+  // Focus the safe choice, so a stray Enter does not reset.
+  ;(confirming ? resetNo : reset).focus()
+}
+
+reset.addEventListener('click', () => setConfirming(true))
+resetNo.addEventListener('click', () => setConfirming(false))
+resetConfirm.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') setConfirming(false)
+})
+resetYes.addEventListener('click', () => {
+  setConfirming(false)
   render(DEFAULT_SETTINGS)
   save(DEFAULT_SETTINGS)
 })

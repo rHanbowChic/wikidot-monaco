@@ -1,9 +1,15 @@
 import { t } from '../i18n'
 
-/** Strings of options.html, keyed by the elements' `data-i18n` attribute. `code` spans in backticks. */
+/**
+ * Strings of options.html, keyed by the elements' `data-i18n` attribute. `code` spans in
+ * backticks, bold text in `**`.
+ */
 export const MESSAGES = {
   title: t('Wikidot Monaco Settings', 'Wikidot Monaco 设置'),
-  editor: t('Editor', '编辑器'),
+  categories: t('Categories', '分类'),
+  general: t('General', '常规'),
+  appearance: t('Appearance', '外观'),
+  history: t('Page history', '页面历史'),
   enabled: t('Enable', '启用'),
   enabledHint: t(
     'Use an editor with syntax highlighting instead of the plain text box when editing pages, posting, and viewing source.',
@@ -45,13 +51,18 @@ export const MESSAGES = {
     'Add `[[/div]]` when completing `[[div]]`.',
     '补全 `[[div]]` 时自动加上 `[[/div]]`。',
   ),
-  saving: t('Saving', '保存'),
-  saveTimeout: t('Timeout (seconds)', '超时（秒）'),
+  saveTimeout: t('Save timeout (seconds)', '保存超时（秒）'),
   saveTimeoutHint: t(
     'If saving a page or a post gets no response in this time, show an error so you can save again. 0 waits forever.',
     '保存页面或发帖超过这个时间没有响应时，提示失败，可以重新保存。0 表示一直等待。',
   ),
   reset: t('Restore defaults', '恢复默认设置'),
+  resetConfirm: t(
+    'This restores **all settings in every category** to their defaults, not only the ones shown. This cannot be undone.',
+    '这会把**所有分类中的全部设置**恢复为默认值，而不只是当前显示的这些。此操作无法撤销。',
+  ),
+  resetYes: t('Restore all', '全部恢复'),
+  cancel: t('Cancel', '取消'),
   saved: t('Saved', '已保存'),
 }
 
