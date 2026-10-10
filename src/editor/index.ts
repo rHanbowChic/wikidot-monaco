@@ -100,15 +100,34 @@ const BASE_OPTIONS: monaco.editor.IEditorOptions = {
   bracketPairColorization: { enabled: false },
 }
 
+/**
+ * The width for a border-box wrapper that takes `element`'s place, as its stylesheets set it.
+ * Call while `element` is hidden: the computed width of an element that isn't rendered keeps
+ * percentages, where a rendered one's is in pixels and wouldn't follow the page's width.
+ * `extra` is the padding and border to add to a content-box width.
+ */
+function widthOf(element: HTMLElement, extra: number) {
+  const style = getComputedStyle(element)
+  const width = style.width
+  // `auto`, `fit-content` and the like: fill the line, as before.
+  if (!/\d/.test(width)) return '100%'
+  return style.boxSizing === 'border-box' || !extra ? width : `calc(${width} + ${extra}px)`
+}
+
 /** Hides `element` and puts an empty wrapper for an editor in its place. */
 function cover(element: HTMLElement, height: number) {
   const wrapper = document.createElement('div')
   wrapper.className = 'wikidot-monaco'
-  wrapper.style.width = element.style.width || '100%'
   wrapper.style.height = `${height}px`
-  element.after(wrapper)
+  // Padding and border in pixels, while `element` is still rendered.
+  const style = getComputedStyle(element)
+  const extra = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
+    .map((side) => parseFloat(style[side as keyof CSSStyleDeclaration] as string) || 0)
+    .reduce((a, b) => a + b)
   const previousDisplay = element.style.display
   element.style.display = 'none'
+  wrapper.style.width = widthOf(element, extra)
+  element.after(wrapper)
   const uncover = () => {
     wrapper.remove()
     element.style.display = previousDisplay
