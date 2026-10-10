@@ -7,7 +7,7 @@ import { installTimeout } from './timeout'
 
 type EditorModule = typeof import('../editor')
 
-const TEXTAREA_SELECTOR = '#new-post-form textarea#np-text, textarea#edit-page-textarea'
+const TEXTAREA_SELECTOR = ':is(#new-post-form, #edit-post-form) textarea#np-text, textarea#edit-page-textarea'
 const SOURCE_SELECTOR = 'div.page-source'
 
 let message: SettingsMessage | null = null
