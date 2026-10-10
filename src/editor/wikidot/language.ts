@@ -9,8 +9,15 @@ export const LANGUAGE_ID = 'wikidot'
 // Languages that can be highlighted inside [[code type="..."]].
 const EMBEDDED = 'css|html|javascript'
 
+/**
+ * A pattern matching `word` in any case. Monarch ignores per-rule regex flags, and its
+ * `ignoreCase` option would apply to every rule.
+ */
+const anyCase = (word: string) =>
+  word.replace(/[a-z]/gi, (c) => `[${c.toLowerCase()}${c.toUpperCase()}]`)
+
 function embeddedState(tag: string): Record<string, monaco.languages.IMonarchLanguageRule[]> {
-  const end = new RegExp(`\\[\\[\\/${tag}\\s*\\]\\]`)
+  const end = new RegExp(`\\[\\[\\/${anyCase(tag)}\\s*\\]\\]`)
   return {
     [`embedded_${tag}`]: [
       [end, { token: '@rematch', switchTo: '@embeddedEnd', nextEmbedded: '@pop' }],
@@ -52,17 +59,18 @@ const tokenizer: monaco.languages.IMonarchLanguage = {
         ],
       ],
       [/(\[\[)(code)(?=[\s\]])/, ['delimiter.tag', { token: 'tag', next: '@rawTag.code' }]],
+      // Like module names, `html` is case-insensitive.
       [
-        /(\[\[)(html)(\s*\]\])/,
+        new RegExp(`(\\[\\[)(${anyCase('html')})(\\s*\\]\\])`),
         [
           'delimiter.tag',
           'tag',
           { token: 'delimiter.tag', next: '@embedded_html', nextEmbedded: 'html' },
         ],
       ],
-      // Module names are case-insensitive; Monarch ignores per-rule regex flags.
+      // Module names are case-insensitive.
       [
-        /(\[\[)(module)(\s+)([cC][sS][sS])(?=[\s\]])/,
+        new RegExp(`(\\[\\[)(module)(\\s+)(${anyCase('css')})(?=[\\s\\]])`),
         ['delimiter.tag', 'tag', '', { token: 'type', next: '@moduleCss' }],
       ],
       [

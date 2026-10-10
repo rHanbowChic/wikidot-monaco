@@ -16,9 +16,13 @@ import { monaco } from '../monaco'
 
 type Language = 'css' | 'html'
 
-const BLOCKS: { language: Language; open: RegExp; close: string }[] = [
-  { language: 'css', open: /\[\[module\s+css(?:\s[^\]]*)?\]\]/gi, close: '[[/module]]' },
-  { language: 'html', open: /\[\[html\s*\]\]/gi, close: '[[/html]]' },
+const BLOCKS: { language: Language; open: RegExp; close: RegExp }[] = [
+  {
+    language: 'css',
+    open: /\[\[module\s+css(?:\s[^\]]*)?\]\]/gi,
+    close: /\[\[\/module\s*\]\]/gi,
+  },
+  { language: 'html', open: /\[\[html\s*\]\]/gi, close: /\[\[\/html\s*\]\]/gi },
 ]
 
 /** Trigger characters of Monaco's CSS and HTML completion providers. */
@@ -37,7 +41,8 @@ function regionAt(text: string, offset: number): Region | null {
     let m: RegExpExecArray | null
     while ((m = open.exec(text)) && m.index < offset) {
       const start = m.index + m[0].length
-      const closeAt = text.indexOf(close, start)
+      close.lastIndex = start
+      const closeAt = close.exec(text)?.index ?? -1
       const end = closeAt < 0 ? text.length : closeAt
       if (offset >= start && offset <= end) return { language, start, end }
       if (closeAt < 0) break
