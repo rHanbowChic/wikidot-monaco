@@ -175,8 +175,81 @@ function textareaOptions(): monaco.editor.IEditorOptions {
   return { ...editorOptions(), autoIndent: settings.tagEnter ? 'keep' : 'none' }
 }
 
+const TO_TEXTAREA = t('Switch to Plain Textarea', '切换到纯文本框')
+const TO_MONACO = t('Switch to the Monaco editor', '切换到 Monaco 编辑器')
+
+/** Textareas switched back to plain, each with what removes its button to switch again. */
+const plain = new Map<HTMLTextAreaElement, () => void>()
+
+/**
+ * Puts a link that switches back to Monaco next to wikidot's -/+ links under the textarea,
+ * as one more `a` in their `div.change-textarea-size` so site styles for them apply.
+ */
+function addMonacoButton(textarea: HTMLTextAreaElement) {
+  const form = textarea.closest('form')
+  let sizes = form?.querySelector<HTMLElement>('.change-textarea-size')
+  const created = !sizes
+  if (!sizes) {
+    sizes = document.createElement('div')
+    sizes.className = 'change-textarea-size'
+    // The textarea sits in a div of its own in wikidot's forms.
+    const parent = textarea.parentElement
+    ;(parent && parent !== form && parent.children.length === 1 ? parent : textarea).after(sizes)
+  }
+  // Spaced from the -/+ links like they are from each other.
+  const space = document.createTextNode(created ? '' : ' ')
+  const button = document.createElement('a')
+  button.href = 'javascript:;'
+  button.className = 'wikidot-monaco-switch'
+  button.textContent = 'Monaco'
+  button.title = tr(TO_MONACO)
+  sizes.append(space, button)
+  const remove = () => {
+    plain.delete(textarea)
+    if (created) sizes.remove()
+    else (button.remove(), space.remove())
+  }
+  button.addEventListener('click', (e) => {
+    e.preventDefault()
+    const { selectionStart, selectionEnd } = textarea
+    remove()
+    attach(textarea)
+    const editor = instances.get(textarea)?.editor as monaco.editor.IStandaloneCodeEditor
+    const model = editor?.getModel()
+    if (!model) return
+    editor.setSelection(
+      monaco.Range.fromPositions(
+        model.getPositionAt(selectionStart),
+        model.getPositionAt(selectionEnd),
+      ),
+    )
+    editor.revealRangeInCenterIfOutsideViewport(editor.getSelection()!)
+    editor.focus()
+  })
+  plain.set(textarea, remove)
+}
+
+/** Replaces the editor with the textarea it covers, keeping the selection. */
+function switchToTextarea(textarea: HTMLTextAreaElement) {
+  const instance = instances.get(textarea)
+  const editor = instance?.editor as monaco.editor.IStandaloneCodeEditor | undefined
+  const model = editor?.getModel()
+  const selection = editor?.getSelection()
+  const [start, end] =
+    selection && model
+      ? [
+          model.getOffsetAt(selection.getStartPosition()),
+          model.getOffsetAt(selection.getEndPosition()),
+        ]
+      : [0, 0]
+  instance?.dispose()
+  addMonacoButton(textarea)
+  textarea.focus()
+  textarea.setSelectionRange(start, end)
+}
+
 export function attach(textarea: HTMLTextAreaElement) {
-  if (instances.has(textarea)) return
+  if (instances.has(textarea) || plain.has(textarea)) return
   const { editor, wrapper, unmount } = mount(
     textarea,
     textarea.value,
@@ -193,11 +266,20 @@ export function attach(textarea: HTMLTextAreaElement) {
   const binding = bindTextarea(textarea, editor, wrapper)
   // After the binding, so wikidot's own Enter handling comes first.
   const enter = bindEnter(editor, wrapper, () => settings.tagEnter)
+  const switchAction = editor.addAction({
+    id: 'wikidot-monaco.switchToTextarea',
+    label: tr(TO_TEXTAREA),
+    contextMenuGroupId: 'z_settings',
+    contextMenuOrder: 0,
+    // Not while the action runs: it disposes the editor that runs it.
+    run: () => void setTimeout(() => switchToTextarea(textarea)),
+  })
   instances.set(textarea, {
     editor,
     binding,
     configure: () => editor.updateOptions(textareaOptions()),
     dispose() {
+      switchAction.dispose()
       enter.dispose()
       binding.dispose()
       unmount()
@@ -313,10 +395,12 @@ function attachDiff(div: HTMLElement) {
 /** Drops editors whose element has left the document (wikidot removes forms and panels via AJAX). */
 export function prune() {
   for (const [element, instance] of instances) if (!element.isConnected) instance.dispose()
+  for (const [textarea, remove] of plain) if (!textarea.isConnected) remove()
 }
 
 export function detachAll() {
   for (const instance of [...instances.values()]) instance.dispose()
+  for (const remove of [...plain.values()]) remove()
 }
 
 // Scripts often insert text with execCommand('insertText') after focusing the textarea;
