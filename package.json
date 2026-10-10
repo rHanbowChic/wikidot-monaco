@@ -1,7 +1,7 @@
 {
   "name": "wikidot-monaco",
   "displayName": "Wikidot Monaco",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "**",
   "description": "Replaces the wikidot source editor with Monaco, with completion for wikidot syntax.",
   "type": "module",
