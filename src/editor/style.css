@@ -1,7 +1,6 @@
 .wikidot-monaco {
-  box-sizing: border-box;
+  /* box-sizing, width, max-width and containment are set inline by cover(). */
   min-height: 160px;
-  max-width: 100%;
   border: 1px solid #c8c8c8;
   overflow: hidden;
   resize: vertical;

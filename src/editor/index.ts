@@ -114,23 +114,63 @@ function widthOf(element: HTMLElement, extra: number) {
   return style.boxSizing === 'border-box' || !extra ? width : `calc(${width} + ${extra}px)`
 }
 
+/** Sets inline `!important` declarations, which no stylesheet rule can override. */
+function force(element: HTMLElement, declarations: Record<string, string>) {
+  for (const [name, value] of Object.entries(declarations)) {
+    element.style.setProperty(name, value, 'important')
+  }
+}
+
+/** Runs `fn` with `element`'s inline `name` forced to `value`, then puts the old one back. */
+function withStyle<T>(element: HTMLElement, name: string, value: string, fn: () => T) {
+  const previous = element.style.getPropertyValue(name)
+  const priority = element.style.getPropertyPriority(name)
+  force(element, { [name]: value })
+  try {
+    return fn()
+  } finally {
+    element.style.setProperty(name, previous, priority)
+  }
+}
+
+const sumOf = (style: CSSStyleDeclaration, names: string[]) =>
+  names.map((name) => parseFloat(style.getPropertyValue(name)) || 0).reduce((a, b) => a + b)
+
 /** Hides `element` and puts an empty wrapper for an editor in its place. */
 function cover(element: HTMLElement, height: number) {
   const wrapper = document.createElement('div')
   wrapper.className = 'wikidot-monaco'
   wrapper.style.height = `${height}px`
   // Padding and border in pixels, while `element` is still rendered.
-  const style = getComputedStyle(element)
-  const extra = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
-    .map((side) => parseFloat(style[side as keyof CSSStyleDeclaration] as string) || 0)
-    .reduce((a, b) => a + b)
-  const previousDisplay = element.style.display
-  element.style.display = 'none'
-  wrapper.style.width = widthOf(element, extra)
+  const extra = sumOf(getComputedStyle(element), [
+    'padding-left',
+    'padding-right',
+    'border-left-width',
+    'border-right-width',
+  ])
+  // The width `element` asks of a parent that fits its content (a table cell, float,
+  // inline-block or flex item): its border-box width when its own width is `auto`.
+  const intrinsic = withStyle(element, 'width', 'auto', () => element.offsetWidth)
+  const previousDisplay = element.style.getPropertyValue('display')
+  const displayPriority = element.style.getPropertyPriority('display')
+  force(element, { display: 'none' })
+  const width = widthOf(element, extra)
   element.after(wrapper)
+  const border = sumOf(getComputedStyle(wrapper), ['border-left-width', 'border-right-width'])
+  force(wrapper, {
+    'box-sizing': 'border-box',
+    width,
+    'max-width': '100%',
+    // Monaco sizes its content to the wrapper's width in pixels. Without containment that
+    // content would widen a parent that fits its content, which widens a percentage width
+    // in turn: with `calc(100% + 14px)` the editor grew 14px on every layout. Ask the
+    // parent for the width `element` asked for instead.
+    contain: 'inline-size',
+    'contain-intrinsic-inline-size': `${Math.max(intrinsic - border, 0)}px`,
+  })
   const uncover = () => {
     wrapper.remove()
-    element.style.display = previousDisplay
+    element.style.setProperty('display', previousDisplay, displayPriority)
     instances.delete(element)
   }
   return { wrapper, uncover }
