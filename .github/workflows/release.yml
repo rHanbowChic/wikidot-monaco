@@ -1,0 +1,97 @@
+# Every push to the release branch builds the Chrome .crx and the unsigned Firefox .zip and puts
+# them in the draft release of package.json's version, creating the draft if needed. Publishing
+# the draft (by hand, on GitHub) creates the tag.
+name: Release
+
+on:
+  push:
+    branches: [release]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# A later push replaces the files of an earlier one, so let them run one at a time.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # The key decides the extension ID, so the .crx must always be signed with the same one.
+      # scripts/crx.mjs would create a new key when there is none; refuse instead.
+      - name: Signing key
+        env:
+          CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+        run: |
+          if [ -z "$CRX_PRIVATE_KEY" ]; then
+            echo "::error::Secret CRX_PRIVATE_KEY is not set (the .pem used to sign earlier .crx files)."
+            exit 1
+          fi
+          printf '%s\n' "$CRX_PRIVATE_KEY" > "$RUNNER_TEMP/key.pem"
+
+      - name: Build Chrome .crx
+        run: npm run crx
+        env:
+          CRX_KEY: ${{ runner.temp }}/key.pem
+
+      - name: Build Firefox .zip
+        run: npm run zip:firefox
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/key.pem"
+
+      # Notes: this version's section of CHANGELOG.md.
+      - name: Release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v heading="## $VERSION" '
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          if [ ! -s "$RUNNER_TEMP/notes.md" ]; then
+            echo "::warning::CHANGELOG.md has no section for $VERSION."
+          fi
+
+      - name: Update draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          files=(
+            "package/Wikidot-Monaco-$VERSION.crx"
+            "package/wikidot-monaco-$VERSION-firefox.zip"
+          )
+          # Drafts have no tag yet, so look the release up by tag name in the list.
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            --jq ".[] | select(.tag_name == \"$VERSION\") | {id, draft}")
+          if [ -z "$release" ]; then
+            gh release create "$VERSION" "${files[@]}" --draft --title "$VERSION" \
+              --target "$GITHUB_SHA" --notes-file "$RUNNER_TEMP/notes.md"
+          elif [ "$(jq -r .draft <<< "$release")" = true ]; then
+            id=$(jq -r .id <<< "$release")
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$id" \
+              -f target_commitish="$GITHUB_SHA" -F body=@"$RUNNER_TEMP/notes.md" > /dev/null
+            gh release upload "$VERSION" "${files[@]}" --clobber
+          else
+            echo "::error::Release $VERSION is already published. Bump the version in package.json."
+            exit 1
+          fi

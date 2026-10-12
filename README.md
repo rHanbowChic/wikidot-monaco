@@ -54,6 +54,12 @@ Firefox 正式版只能安装由 Mozilla 签名的扩展。`sign:firefox` 以 un
 
 每个版本号只能签名一次，再次签名前先修改 `package.json` 的 `version`。
 
+## 发布
+
+推送到 `release` 分支会触发 GitHub Actions（`.github/workflows/release.yml`）：构建 Chrome 的 `.crx` 与 Firefox 的未签名 `.zip`，放进 `package.json` 版本号对应的 Release 草稿（没有则创建），说明取自 `CHANGELOG.md` 中该版本的一节。再次推送会替换草稿中的文件与说明；在 GitHub 上发布草稿时才创建标签。该版本已正式发布时构建失败，需要先提高版本号。
+
+`.crx` 的签名私钥决定扩展 ID，必须一直使用同一个。把本地的 `key.pem` 存为仓库 secret `CRX_PRIVATE_KEY`（Settings → Secrets and variables → Actions），缺少时构建失败而不会生成新密钥。
+
 ## 结构
 
 - `src/content/bridge.ts`：隔离环境内容脚本，读取设置并传给页面环境
