@@ -1,0 +1,1010 @@
+/* Same design language as the extension's settings page (src/options/index.css): VS Code's
+   light/dark colors, square corners, flat controls, a colored left border for focus. */
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f8f8f8;
+  --fg: #3b3b3b;
+  --fg-strong: #1f1f1f;
+  --muted: #6f6f6f;
+  --line: #e5e5e5;
+  --input-bg: #ffffff;
+  --input-border: #cecece;
+  --focus: #0090f1;
+  --accent: #005fb8;
+  --accent-hover: #0258a8;
+  --link: #005fb8;
+  --accent-fg: #ffffff;
+  --hover: rgba(0, 0, 0, 0.04);
+  --selected: rgba(0, 95, 184, 0.08);
+  --button-bg: #e5e5e5;
+  --button-hover: #cccccc;
+  --code-bg: rgba(0, 0, 0, 0.06);
+  /* Editor preview: the extension's wikidot-light theme. */
+  --ed-bg: #ffffff;
+  --ed-bar: #f3f3f3;
+  --ed-fg: #000000;
+  --ed-gutter: #237893;
+  --ed-line: #f0f0f0;
+  --ed-heading: #0451a5;
+  --ed-tag: #800000;
+  --ed-attr: #e50000;
+  --ed-value: #0000ff;
+  --ed-link: #006ab1;
+  --ed-var: #795e26;
+  --ed-suggest-bg: #f8f8f8;
+  --ed-suggest-border: #c8c8c8;
+  --ed-suggest-selected: #0060c0;
+  --ed-match: #0066bf;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  --wd-button-top: #ffffff;
+  --wd-button-bottom: #dcdcdc;
+  --wd-button-border: #b4b4b4;
+  --wd-button-fg: #333333;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e1e;
+    --bg-alt: #181818;
+    --fg: #cccccc;
+    --fg-strong: #e7e7e7;
+    --muted: #9d9d9d;
+    --line: #2b2b2b;
+    --input-bg: #313131;
+    --input-border: #3c3c3c;
+    --focus: #007fd4;
+    --accent: #0078d4;
+    --accent-hover: #026ec1;
+    --link: #4daafc;
+    --accent-fg: #ffffff;
+    --hover: rgba(255, 255, 255, 0.04);
+    --selected: rgba(0, 120, 212, 0.18);
+    --button-bg: #313131;
+    --button-hover: #3c3c3c;
+    --code-bg: rgba(255, 255, 255, 0.1);
+    /* wikidot-dark */
+    --ed-bg: #1e1e1e;
+    --ed-bar: #252526;
+    --ed-fg: #d4d4d4;
+    --ed-gutter: #858585;
+    --ed-line: #282828;
+    --ed-heading: #569cd6;
+    --ed-tag: #569cd6;
+    --ed-attr: #9cdcfe;
+    --ed-value: #ce9178;
+    --ed-link: #4fc1ff;
+    --ed-var: #dcdcaa;
+    --ed-suggest-bg: #252526;
+    --ed-suggest-border: #454545;
+    --ed-suggest-selected: #04395e;
+    --ed-match: #2aaaff;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.36);
+    --wd-button-top: #4a4a4a;
+    --wd-button-bottom: #353535;
+    --wd-button-border: #555555;
+    --wd-button-fg: #d4d4d4;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Anchored sections end up below the sticky top bar. */
+  scroll-padding-top: 64px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    'Ubuntu', 'Droid Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Language: both texts are in the page, one is hidden. */
+html:not(.en) .en,
+html.en .zh {
+  display: none;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 2px;
+}
+
+code {
+  padding: 0 4px;
+  background: var(--code-bg);
+  color: var(--fg);
+  font-family: Consolas, 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+h2 {
+  margin: 0 0 8px;
+  color: var(--fg-strong);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+h3 {
+  margin: 0 0 6px;
+  color: var(--fg-strong);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* Top bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.topbar-inner {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  height: 52px;
+}
+
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--fg-strong);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.topnav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* Like the settings menu, a colored edge marks the hovered entry. */
+.topnav a {
+  padding: 4px 10px;
+  border-bottom: 2px solid transparent;
+  color: var(--fg);
+  font-size: 15px;
+}
+
+.topnav a:hover {
+  border-bottom-color: var(--accent);
+  background: var(--hover);
+  color: var(--fg-strong);
+  text-decoration: none;
+}
+
+/* Buttons: flat, square, as on the settings page. */
+button,
+.button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--button-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:hover,
+.button:hover {
+  background: var(--button-hover);
+  text-decoration: none;
+}
+
+.button {
+  height: 38px;
+  padding: 0 20px;
+}
+
+.button.primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.button.primary:hover {
+  background: var(--accent-hover);
+}
+
+.button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.lang {
+  flex: none;
+}
+
+/* Hero */
+.hero {
+  padding: 72px 0 80px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 56px;
+  align-items: center;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  padding-left: 10px;
+  border-left: 2px solid var(--accent);
+  color: var(--muted);
+  font-size: 15px;
+}
+
+h1 {
+  margin: 0;
+  color: var(--fg-strong);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.lead {
+  margin: 20px 0 28px;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.actions.center {
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 24px 0 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 14px;
+  list-style: none;
+}
+
+.facts li::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
+/* Editor preview */
+.editor {
+  margin: 0;
+  border: 1px solid var(--ed-suggest-border);
+  background: var(--ed-bg);
+  box-shadow: var(--shadow);
+}
+
+/* wikidot's editor toolbar: three rows of small bevelled buttons above the text box. */
+.wd-toolbar {
+  padding: 6px 8px 4px;
+  border-bottom: 1px solid var(--ed-suggest-border);
+  background: var(--ed-bar);
+  cursor: default;
+  user-select: none;
+}
+
+.wd-toolbar div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.wd-toolbar span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--wd-button-border);
+  border-radius: 3px;
+  background: linear-gradient(var(--wd-button-top), var(--wd-button-bottom));
+  color: var(--wd-button-fg);
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.wd-toolbar span:hover {
+  border-color: var(--wd-button-fg);
+}
+
+.wd-toolbar .small {
+  width: auto;
+  min-width: 22px;
+  padding: 0 3px;
+  font-size: 9px;
+}
+
+.wd-toolbar .mono {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.wd-toolbar sup,
+.wd-toolbar sub {
+  font-size: 8px;
+}
+
+.wd-toolbar svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+
+/* The black bars between button groups. */
+.wd-toolbar em {
+  width: 2px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--wd-button-fg);
+  opacity: 0.6;
+}
+
+.editor-body {
+  position: relative;
+  overflow: hidden;
+  /* Room below the last line for the suggest widget. */
+  padding: 10px 0 84px;
+  color: var(--ed-fg);
+  font-family: Consolas, 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.code {
+  margin: 0;
+  padding: 0;
+  counter-reset: line;
+  list-style: none;
+}
+
+.code li {
+  min-height: 21px;
+  position: relative;
+  padding-left: 56px;
+  counter-increment: line;
+  white-space: nowrap;
+}
+
+.code li::before {
+  content: counter(line);
+  /* Out of the flow, so the markup's leading whitespace collapses at the line start. */
+  position: absolute;
+  left: 0;
+  width: 32px;
+  color: var(--ed-gutter);
+  text-align: right;
+}
+
+.code .cursor-line {
+  background: var(--ed-line);
+}
+
+.code .h {
+  color: var(--ed-heading);
+  font-weight: bold;
+}
+
+.code .t {
+  color: var(--ed-tag);
+}
+
+.code .a {
+  color: var(--ed-attr);
+}
+
+.code .v {
+  color: var(--ed-value);
+}
+
+.code .l {
+  color: var(--ed-link);
+  text-decoration: underline;
+}
+
+.code .var {
+  color: var(--ed-var);
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 18px;
+  margin-left: 1px;
+  background: var(--ed-fg);
+  vertical-align: -4px;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret,
+  .tick.shake {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Suggest widget below the cursor, as Monaco draws it. */
+.suggest {
+  position: absolute;
+  top: 241px;
+  left: 76px;
+  width: 300px;
+  max-width: calc(100% - 88px);
+  border: 1px solid var(--ed-suggest-border);
+  background: var(--ed-suggest-bg);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.suggest .item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+.suggest .item.selected {
+  background: var(--ed-suggest-selected);
+  color: #ffffff;
+}
+
+.suggest i {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  margin-right: 2px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+}
+
+.suggest b {
+  color: var(--ed-match);
+}
+
+.suggest .selected b {
+  color: inherit;
+}
+
+.suggest em {
+  overflow: hidden;
+  margin-left: auto;
+  padding-left: 12px;
+  font-style: normal;
+  opacity: 0.7;
+  text-overflow: ellipsis;
+}
+
+/* Bands */
+.band {
+  padding: 72px 0;
+}
+
+.band.alt {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-alt);
+}
+
+.section-lead {
+  max-width: 680px;
+  margin: 0 0 32px;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+/* Features: rows like the settings, with a hover background and colored left edge. */
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.feature {
+  padding: 24px 24px 26px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 2px 0 0 transparent;
+}
+
+.feature:hover {
+  background: var(--hover);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.feature svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 12px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: square;
+}
+
+.feature p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Settings */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+}
+
+.split .section-lead {
+  margin-bottom: 24px;
+}
+
+.checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checks li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 4px 0;
+}
+
+/* Looks like a checked box and can be clicked, but only shakes: these stay on. */
+.tick {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  padding: 0;
+  border: 0;
+  background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3 3 7-7' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E")
+    center / 14px no-repeat;
+}
+
+.tick:hover {
+  background-color: var(--accent-hover);
+}
+
+.tick:focus-visible {
+  outline-offset: 1px;
+}
+
+.tick.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+/* A copy of the settings page: the categories switch, the settings are only shown. */
+.panel {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  font-size: 15px;
+}
+
+.panel-nav {
+  padding: 16px 0;
+  border-right: 1px solid var(--line);
+}
+
+.panel-nav button {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 6px 12px;
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--fg);
+  text-align: left;
+}
+
+.panel-nav button:hover {
+  background: var(--hover);
+  color: var(--fg-strong);
+}
+
+.panel-nav button[aria-current] {
+  border-left-color: var(--accent);
+  background: var(--selected);
+  color: var(--fg-strong);
+  font-weight: 600;
+}
+
+.panel-nav button:focus-visible {
+  outline-offset: -1px;
+}
+
+/* All categories share one grid cell, so the panel keeps the height of the longest. */
+.panel-body {
+  display: grid;
+  padding: 12px 16px;
+  cursor: default;
+}
+
+.category {
+  grid-area: 1 / 1;
+}
+
+.category[inert] {
+  visibility: hidden;
+}
+
+.panel .description {
+  margin: 2px 0 6px;
+  color: var(--muted);
+}
+
+.setting {
+  margin: 0 -16px;
+  padding: 10px 14px 12px;
+  border-left: 2px solid transparent;
+}
+
+.setting:hover {
+  background: var(--hover);
+}
+
+.title {
+  color: var(--fg-strong);
+  font-weight: 600;
+}
+
+.select,
+.number {
+  height: 30px;
+  margin-top: 4px;
+  padding: 0 8px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  line-height: 28px;
+}
+
+.select {
+  width: 200px;
+  max-width: 100%;
+  background: var(--input-bg)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238a8a8a' stroke-width='1.5'/%3E%3C/svg%3E")
+    right 6px center / 16px no-repeat;
+}
+
+.number {
+  width: 100px;
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.box {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+}
+
+.box.on {
+  border-color: var(--accent);
+  background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3 3 7-7' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E")
+    center / 14px no-repeat;
+}
+
+/* Install */
+.install {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.install-card {
+  padding: 24px 28px 26px;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.install-card > p {
+  margin: 0 0 16px;
+}
+
+.install-card > .button {
+  margin-top: auto;
+}
+
+details {
+  align-self: stretch;
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+summary {
+  padding: 12px 0 4px;
+  color: var(--fg-strong);
+  cursor: pointer;
+}
+
+summary:focus-visible {
+  outline: 1px solid var(--focus);
+}
+
+.install-card details ol {
+  margin: 8px 0 0;
+}
+
+.requires {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.install-card ol {
+  margin: 0 0 20px;
+  padding: 0;
+  counter-reset: step;
+  list-style: none;
+}
+
+.install-card li {
+  position: relative;
+  padding: 6px 0 6px 36px;
+  counter-increment: step;
+}
+
+.install-card li::before {
+  content: counter(step);
+  position: absolute;
+  top: 7px;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--selected);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+}
+
+/* Build from source */
+.terminal {
+  overflow-x: auto;
+  margin: 0;
+  padding: 20px 24px;
+  border: 1px solid var(--line);
+  background: #1e1e1e;
+  color: #cccccc;
+  font-family: Consolas, 'Droid Sans Mono', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.terminal code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.terminal .prompt {
+  color: #569cd6;
+  user-select: none;
+}
+
+.terminal .comment {
+  color: #6a9955;
+}
+
+/* Footer */
+.site-footer {
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  align-items: center;
+}
+
+.brand.small {
+  font-size: 15px;
+}
+
+.site-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.muted {
+  margin: 0 0 0 auto;
+  color: var(--muted);
+}
+
+/* Narrow screens */
+@media (max-width: 960px) {
+  .hero-inner,
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 0 16px;
+  }
+
+  .topbar-inner {
+    gap: 12px;
+  }
+
+  /* Only GitHub and the language button stay in the bar. */
+  .topnav a:not([target]) {
+    display: none;
+  }
+
+  .hero {
+    padding: 40px 0 48px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .band {
+    padding: 48px 0;
+  }
+
+  .features,
+  .install {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-body {
+    font-size: 12px;
+  }
+
+  .panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel-nav {
+    display: flex;
+    overflow-x: auto;
+    padding: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel-nav button {
+    flex: none;
+    width: auto;
+    padding: 10px 12px;
+    border-bottom: 2px solid transparent;
+    border-left: 0;
+  }
+
+  .panel-nav button[aria-current] {
+    border-bottom-color: var(--accent);
+  }
+
+  .muted {
+    margin-left: 0;
+  }
+}

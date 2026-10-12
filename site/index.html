@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Wikidot Monaco：把 wikidot 的源码编辑框换成 VS Code 同款的 Monaco 编辑器，带 wikidot 语法高亮、自动补全与悬停说明。"
+    />
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Wikidot Monaco</title>
+    <!-- Before first paint: pick the language so the other one never flashes. -->
+    <script>
+      try {
+        const saved = localStorage.getItem('lang')
+        const lang = saved || (navigator.language.startsWith('zh') ? 'zh' : 'en')
+        if (lang === 'en') document.documentElement.classList.add('en')
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <!--
+      Every text comes in two spans, .zh and .en; style.css shows the one matching <html class="en">.
+      Colors and controls follow the extension's settings page (src/options/index.css).
+    -->
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a class="brand" href="#top">
+          <img src="logo.png" alt="" width="28" height="28" />
+          <span>Wikidot Monaco</span>
+        </a>
+        <nav class="topnav" aria-label="Sections">
+          <a href="#features"><span class="zh">特性</span><span class="en">Features</span></a>
+          <a href="#settings"><span class="zh">设置</span><span class="en">Settings</span></a>
+          <a href="#install"><span class="zh">安装</span><span class="en">Install</span></a>
+          <a href="https://github.com/rHanbowChic/wikidot-monaco" target="_blank" rel="noopener"
+            >GitHub</a
+          >
+        </nav>
+        <button type="button" id="lang" class="lang">
+          <span class="zh">English</span><span class="en">中文</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- Hero -->
+      <section class="hero">
+        <div class="wrap hero-inner">
+          <div class="hero-text">
+            <p class="eyebrow">
+              <span class="zh">Chrome / Firefox 扩展</span
+              ><span class="en">Extension for Chrome and Firefox</span>
+            </p>
+            <h1>
+              <span class="zh">用 VS Code 的编辑器<br />编写 Wikidot 页面</span>
+              <span class="en">Write Wikidot pages<br />in the editor of VS Code</span>
+            </h1>
+            <p class="lead">
+              <span class="zh"
+                >把 wikidot 的源码编辑框换成 Monaco 编辑器，带 wikidot
+                语法高亮、标签与模块补全、悬停说明和带高亮的版本比较。装好即用，不改变原有的编辑流程。</span
+              >
+              <span class="en"
+                >Replaces the wikidot source box with the Monaco editor: wikidot syntax
+                highlighting, completion for tags and modules, hover docs and highlighted revision
+                diffs. Works as soon as it is installed, without changing how you edit.</span
+              >
+            </p>
+            <div class="actions">
+              <a class="button primary" href="#install">
+                <span class="zh">安装扩展</span><span class="en">Install</span>
+              </a>
+              <a
+                class="button"
+                href="https://github.com/rHanbowChic/wikidot-monaco"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0z"
+                  />
+                </svg>
+                <span>GitHub</span>
+              </a>
+            </div>
+            <ul class="facts">
+              <li><span class="zh">MIT 许可</span><span class="en">MIT licensed</span></li>
+              <li><span class="zh">不依赖 CDN</span><span class="en">No CDN</span></li>
+              <li><span class="zh">中文 / English</span><span class="en">English / 中文</span></li>
+            </ul>
+          </div>
+
+          <!-- A still picture of the editor, drawn with the extension's wikidot theme colors. -->
+          <figure class="editor" aria-label="Editor preview">
+            <!-- wikidot's editor toolbar (#wd-ed-toolbar), redrawn: it says where this editor lives. -->
+            <div class="wd-toolbar" aria-hidden="true">
+              <div>
+                <span>H1</span><span><b>B</b></span
+                ><span><i>I</i></span
+                ><span><u>U</u></span
+                ><span><s>S</s></span
+                ><span class="mono">tt</span><span>Q</span><span>x<sup>y</sup></span
+                ><span>x<sub>y</sub></span
+                ><span><b>R</b></span>
+              </div>
+              <div>
+                <span>—</span><span class="small"><b>DIV</b></span
+                ><span
+                  ><svg viewBox="0 0 16 16"><path d="M2 4h5v4H2zM9 4h5v4H9zM2 12h12" /></svg></span
+                ><span
+                  ><svg viewBox="0 0 16 16"><path d="M2 3h12v10H2zM2 6h12M6 6v7" /></svg></span
+                ><span class="small"><b>toc</b></span
+                ><em></em><span class="small"><b>code</b></span
+                ><em></em
+                ><span
+                  ><svg viewBox="0 0 16 16">
+                    <path
+                      d="M7 9.5a2.5 2.5 0 0 0 3.5 0l2-2a2.5 2.5 0 0 0-3.5-3.5l-.6.6M9 6.5a2.5 2.5 0 0 0-3.5 0l-2 2A2.5 2.5 0 0 0 7 12l.6-.6"
+                    /></svg></span
+                ><span
+                  ><svg viewBox="0 0 16 16">
+                    <path d="M4 2h5l3 3v9H4zM9 2v3h3M6 9h4M6 11h4" /></svg></span
+                ><em></em
+                ><span
+                  ><svg viewBox="0 0 16 16">
+                    <path d="M2 3h12v10H2zM2 11l4-4 3 3 2-2 3 3" /></svg></span
+                ><em></em><span class="small"><b>&lt;/&gt;</b></span>
+              </div>
+              <div>
+                <span
+                  ><svg viewBox="0 0 16 16">
+                    <path d="M6 4h8M6 8h8M6 12h8M2.5 3v2M2.5 7v2M2.5 11v2" /></svg></span
+                ><span
+                  ><svg viewBox="0 0 16 16">
+                    <path
+                      d="M6 4h8M6 8h8M6 12h8M2 3.5h1v1H2zM2 7.5h1v1H2zM2 11.5h1v1H2z"
+                    /></svg></span
+                ><span
+                  ><svg viewBox="0 0 16 16"><path d="M7 4h7M7 8h7M7 12h7M2 6l2 2-2 2" /></svg></span
+                ><span
+                  ><svg viewBox="0 0 16 16"><path d="M7 4h7M7 8h7M7 12h7M4 6L2 8l2 2" /></svg></span
+                ><span>x<sup>1</sup></span
+                ><em></em><span>√x</span><span class="small">x/2</span><span class="small">Eq.</span
+                ><em></em><span class="small">Bib</span><span class="small">[n]</span>
+              </div>
+            </div>
+            <div class="editor-body">
+              <ol class="code">
+                <li><span class="h">+ Welcome</span></li>
+                <li></li>
+                <li>
+                  <span class="t">[[div</span> <span class="a">class</span>=<span class="v"
+                    >"notice"</span
+                  ><span class="t">]]</span>
+                </li>
+                <li>
+                  &nbsp;&nbsp;<b>**Hello**</b>, see <span class="t">[[[</span
+                  ><span class="l">main</span><span class="t">|</span>home<span class="t">]]]</span
+                  >.
+                </li>
+                <li><span class="t">[[/div]]</span></li>
+                <li></li>
+                <li>
+                  <span class="t">[[module</span> <span class="v">ListPages</span>
+                  <span class="a">category</span>=<span class="v">"news"</span>
+                  <span class="a">limit</span>=<span class="v">"5"</span><span class="t">]]</span>
+                </li>
+                <li>
+                  * <span class="var">%%title_linked%%</span> —
+                  <span class="var">%%created_at%%</span>
+                </li>
+                <li><span class="t">[[/module]]</span></li>
+                <li></li>
+                <li class="cursor-line"><span class="t">[[co</span><span class="caret"></span></li>
+              </ol>
+              <div class="suggest" aria-hidden="true">
+                <div class="item selected">
+                  <i></i><span><b>co</b>de</span> <em>[[code type="..."]]</em>
+                </div>
+                <div class="item">
+                  <i></i><span><b>co</b>llapsible</span>
+                </div>
+                <div class="item">
+                  <i></i><span><b>co</b>lumn</span>
+                </div>
+                <div class="item">
+                  <i></i><span><b>co</b>ntent</span>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section id="features" class="band">
+        <div class="wrap">
+          <h2><span class="zh">特性</span><span class="en">Features</span></h2>
+          <p class="section-lead">
+            <span class="zh">页面编辑、论坛发帖、查看源代码和页面历史，都换成同一个编辑器。</span>
+            <span class="en"
+              >Page editing, forum posts, page source and page history all use the same
+              editor.</span
+            >
+          </p>
+          <div class="features">
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 6l-6 6 6 6M16 6l6 6-6 6" />
+              </svg>
+              <h3><span class="zh">语法高亮</span><span class="en">Syntax highlighting</span></h3>
+              <p>
+                <span class="zh"
+                  >标题、标签、属性、链接、ListPages 变量各有颜色；<code>[[module CSS]]</code> 和
+                  <code>[[html]]</code> 块内按 CSS / HTML 高亮。</span
+                >
+                <span class="en"
+                  >Headings, tags, attributes, links and ListPages variables in their own colors;
+                  CSS and HTML highlighting inside <code>[[module CSS]]</code> and
+                  <code>[[html]]</code>.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5h16v14H4zM8 10h8M8 14h5" />
+              </svg>
+              <h3><span class="zh">自动补全</span><span class="en">Autocomplete</span></h3>
+              <p>
+                <span class="zh"
+                  >补全标签、属性、模块和 ListPages 变量，补全 <code>[[div]]</code> 时自动加上
+                  <code>[[/div]]</code>。</span
+                >
+                <span class="en"
+                  >Completes tags, attributes, modules and ListPages variables, and adds
+                  <code>[[/div]]</code> when completing <code>[[div]]</code>.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7v1" />
+              </svg>
+              <h3><span class="zh">悬停说明</span><span class="en">Hover docs</span></h3>
+              <p>
+                <span class="zh">鼠标停在标签、模块、属性或变量上，就能看到它的用法。</span>
+                <span class="en"
+                  >Rest the pointer on a tag, module, attribute or variable to see how it is
+                  used.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"
+                />
+              </svg>
+              <h3><span class="zh">页面跳转</span><span class="en">Page links</span></h3>
+              <p>
+                <span class="zh"
+                  >按住 Ctrl 点击 <code>[[include ...]]</code>、<code>[[[页面]]]</code>
+                  中的页面名，在新标签页打开。</span
+                >
+                <span class="en"
+                  >Ctrl+click the page in <code>[[include ...]]</code> or <code>[[[page]]]</code> to
+                  open it in a new tab.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 4h7v16H4zM13 4h7v16h-7M6.5 9h2M15.5 9h2M15.5 13h2" />
+              </svg>
+              <h3><span class="zh">版本比较</span><span class="en">Revision diffs</span></h3>
+              <p>
+                <span class="zh"
+                  >页面历史的「源代码变更」以带高亮的左右对比显示，未改动部分自动折叠；手机上可改为内联。</span
+                >
+                <span class="en"
+                  >Source changes in page history are shown side by side with highlighting,
+                  unchanged parts folded; switch to inline on phones.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 3" />
+              </svg>
+              <h3><span class="zh">保存超时</span><span class="en">Save timeout</span></h3>
+              <p>
+                <span class="zh"
+                  >网络不好时，保存不再一直卡在「Saving
+                  page...」：超时后提示失败，可以直接再存一次。</span
+                >
+                <span class="en"
+                  >On a bad connection saving no longer hangs on “Saving page...”: after a timeout
+                  you get an error and can save again.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h10M17 15l3 2-3 2" />
+              </svg>
+              <h3>
+                <span class="zh">兼容原有工具</span><span class="en">Keeps your tools working</span>
+              </h3>
+              <p>
+                <span class="zh"
+                  >原文本框仍在页面中，读写都转给编辑器；wikidot
+                  的编辑工具栏和社区插件照常工作。</span
+                >
+                <span class="en"
+                  >The original textarea stays on the page and reads and writes the editor, so the
+                  wikidot toolbar and community scripts keep working.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 8h13l-3-3M20 16H7l3 3" />
+              </svg>
+              <h3>
+                <span class="zh">随时切换回去</span><span class="en">Switch back anytime</span>
+              </h3>
+              <p>
+                <span class="zh"
+                  >右键菜单「切换到纯文本框」，再点 −/+
+                  旁的「Monaco」即可切回，内容与选区都保留。</span
+                >
+                <span class="en"
+                  >“Switch to Plain Textarea” in the context menu; the “Monaco” button next to −/+
+                  brings the editor back, with text and selection kept.</span
+                >
+              </p>
+            </article>
+            <article class="feature">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" />
+              </svg>
+              <h3>
+                <span class="zh">离线、按需加载</span><span class="en">Offline, on demand</span>
+              </h3>
+              <p>
+                <span class="zh"
+                  >Monaco 完整打包在扩展内，不请求任何 CDN；页面上出现编辑框时才加载。</span
+                >
+                <span class="en"
+                  >Monaco is bundled in the extension with no CDN requests, and loads only when an
+                  edit box appears.</span
+                >
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings: a still copy of the extension's settings page. -->
+      <section id="settings" class="band alt">
+        <div class="wrap split">
+          <div>
+            <h2><span class="zh">按自己的习惯调整</span><span class="en">Make it yours</span></h2>
+            <p class="section-lead">
+              <span class="zh"
+                >主题、字号、行高、换行、行号、缩略图、补全方式……设置在各设备间同步，改完立即生效。也可以在编辑器里右键打开设置页。</span
+              >
+              <span class="en"
+                >Theme, font size, line height, word wrap, line numbers, minimap, how suggestions
+                show up… Settings sync across devices and apply right away. Right-click in the
+                editor to open them.</span
+              >
+            </p>
+            <ul class="checks">
+              <li>
+                <button type="button" class="tick" aria-pressed="true"></button>
+                <span class="zh">浅色、深色或跟随系统</span
+                ><span class="en">Light, dark, or follow the system</span>
+              </li>
+              <li>
+                <button type="button" class="tick" aria-pressed="true"></button>
+                <span class="zh">输入时补全、仅 Ctrl+Space 或关闭</span
+                ><span class="en">Suggest while typing, on Ctrl+Space only, or never</span>
+              </li>
+              <li>
+                <button type="button" class="tick" aria-pressed="true"></button>
+                <span class="zh">标签内回车自动闭合并缩进</span
+                ><span class="en">Enter in tags closes them and indents</span>
+              </li>
+              <li>
+                <button type="button" class="tick" aria-pressed="true"></button>
+                <span class="zh">一键关闭，恢复原本的文本框</span
+                ><span class="en">One switch to go back to the plain text box</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- A copy of the settings page: the categories switch, the settings are only shown. -->
+          <div class="panel" id="panel">
+            <div class="panel-nav">
+              <button type="button" data-category="general">
+                <span class="zh">常规</span><span class="en">General</span></button
+              ><button type="button" data-category="appearance" aria-current="true">
+                <span class="zh">外观</span><span class="en">Appearance</span></button
+              ><button type="button" data-category="completion">
+                <span class="zh">自动补全</span><span class="en">Autocomplete</span></button
+              ><button type="button" data-category="history">
+                <span class="zh">页面历史</span><span class="en">Page history</span>
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="category" data-category="general" inert>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">启用</span><span class="en">Enable</span>
+                  </div>
+                  <div class="check">
+                    <span class="box on"></span
+                    ><span
+                      ><span class="zh"
+                        >编辑页面、发帖和查看源代码时，使用带语法高亮的编辑器代替原本的文本框。</span
+                      ><span class="en"
+                        >Use an editor with syntax highlighting instead of the plain text box when
+                        editing pages, posting, and viewing source.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">保存超时（秒）</span
+                    ><span class="en">Save timeout (seconds)</span>
+                  </div>
+                  <p class="description">
+                    <span class="zh"
+                      >保存页面或发帖超过这个时间没有响应时，提示失败，可以重新保存。0
+                      表示一直等待。</span
+                    ><span class="en"
+                      >If saving a page or a post gets no response in this time, show an error so
+                      you can save again. 0 waits forever.</span
+                    >
+                  </p>
+                  <div class="number">30</div>
+                </div>
+              </div>
+              <div class="category" data-category="appearance">
+                <div class="setting">
+                  <div class="title"><span class="zh">主题</span><span class="en">Theme</span></div>
+                  <div class="select">
+                    <span class="zh">跟随系统</span><span class="en">Follow system</span>
+                  </div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">字号</span><span class="en">Font size</span>
+                  </div>
+                  <div class="number">14</div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">行高</span><span class="en">Line height</span>
+                  </div>
+                  <p class="description">
+                    <span class="zh">字号的倍数。</span
+                    ><span class="en">A multiple of the font size.</span>
+                  </p>
+                  <div class="number">1.5</div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">自动换行</span><span class="en">Word wrap</span>
+                  </div>
+                  <div class="check">
+                    <span class="box on"></span
+                    ><span
+                      ><span class="zh">长行折到下一行显示，不会改动源码。</span
+                      ><span class="en"
+                        >Show long lines on several lines. The source text is not changed.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">行号</span><span class="en">Line numbers</span>
+                  </div>
+                  <div class="check">
+                    <span class="box on"></span
+                    ><span
+                      ><span class="zh">在编辑器左侧显示行号。</span
+                      ><span class="en"
+                        >Show line numbers on the left side of the editor.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">缩略图</span><span class="en">Minimap</span>
+                  </div>
+                  <div class="check">
+                    <span class="box"></span
+                    ><span
+                      ><span class="zh">在编辑器右侧显示全文缩略图。</span
+                      ><span class="en"
+                        >Show an overview of the whole text on the right side of the editor.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="category" data-category="completion" inert>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">显示补全</span><span class="en">Show suggestions</span>
+                  </div>
+                  <div class="select">
+                    <span class="zh">输入时</span><span class="en">While typing</span>
+                  </div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">自动闭合标签</span><span class="en">Close tags</span>
+                  </div>
+                  <div class="check">
+                    <span class="box on"></span
+                    ><span
+                      ><span class="zh"
+                        >补全 <code>[[div]]</code> 时自动加上 <code>[[/div]]</code>。</span
+                      ><span class="en"
+                        >Add <code>[[/div]]</code> when completing <code>[[div]]</code>.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">标签内回车</span><span class="en">Enter in tags</span>
+                  </div>
+                  <div class="check">
+                    <span class="box"></span
+                    ><span
+                      ><span class="zh"
+                        >在 <code>[[div]]</code> 后回车时自动加上
+                        <code>[[/div]]</code
+                        >，并缩进中间的一行；在未写完的标签中回车会先补全标签。</span
+                      ><span class="en"
+                        >Enter after <code>[[div]]</code> adds <code>[[/div]]</code> and indents the
+                        line between; Enter in an unfinished tag finishes it.</span
+                      ></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="category" data-category="history" inert>
+                <div class="setting">
+                  <div class="title">
+                    <span class="zh">源代码变更</span><span class="en">Revision changes</span>
+                  </div>
+                  <p class="description">
+                    <span class="zh">在页面历史中比较版本时，改动的显示方式。</span
+                    ><span class="en"
+                      >How changes are shown when comparing revisions in the page history.</span
+                    >
+                  </p>
+                  <div class="select">
+                    <span class="zh">左右对比</span><span class="en">Side by side</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Install -->
+      <section id="install" class="band">
+        <div class="wrap">
+          <h2><span class="zh">安装</span><span class="en">Install</span></h2>
+          <p class="section-lead">
+            <span class="zh">按浏览器选择安装方式。装好后打开任意 wikidot 站点的编辑页即可。</span
+            ><span class="en"
+              >Pick your browser. Once installed, open the editor on any wikidot site.</span
+            >
+          </p>
+          <div class="install">
+            <div class="install-card">
+              <h3>Firefox</h3>
+              <p class="requires">
+                <span class="zh">需要 Firefox 128 或更新版本</span
+                ><span class="en">Requires Firefox 128 or later</span>
+              </p>
+              <p>
+                <span class="zh">已上架 Firefox 附加组件商店，安装后会自动更新。</span
+                ><span class="en">Available on Firefox Add-ons, with automatic updates.</span>
+              </p>
+              <a
+                class="button primary"
+                href="https://addons.mozilla.org/en-US/firefox/addon/wikidot-monaco/"
+                target="_blank"
+                rel="noopener"
+                ><span class="zh">从 Firefox 附加组件商店安装</span
+                ><span class="en">Get it on Firefox Add-ons</span></a
+              >
+              <details>
+                <summary>
+                  <span class="zh">手动安装</span><span class="en">Install manually</span>
+                </summary>
+                <ol>
+                  <li>
+                    <span class="zh"
+                      >在
+                      <a
+                        href="https://github.com/rHanbowChic/wikidot-monaco/releases"
+                        target="_blank"
+                        rel="noopener"
+                        >GitHub Releases</a
+                      >
+                      下载经 Mozilla 签名的 <code>.xpi</code></span
+                    ><span class="en"
+                      >Download the <code>.xpi</code> signed by Mozilla from
+                      <a
+                        href="https://github.com/rHanbowChic/wikidot-monaco/releases"
+                        target="_blank"
+                        rel="noopener"
+                        >GitHub Releases</a
+                      ></span
+                    >
+                  </li>
+                  <li>
+                    <span class="zh"
+                      >把文件拖进 Firefox 窗口，或在
+                      <code>about:addons</code> 中「从文件安装附加组件」</span
+                    ><span class="en"
+                      >Drop it on a Firefox window, or use “Install Add-on From File” in
+                      <code>about:addons</code></span
+                    >
+                  </li>
+                  <li>
+                    <span class="zh">确认添加</span><span class="en">Confirm the install</span>
+                  </li>
+                </ol>
+              </details>
+            </div>
+            <div class="install-card">
+              <h3>Chrome / Edge</h3>
+              <p class="requires">
+                <span class="zh">需要 Chrome 111 或更新版本</span
+                ><span class="en">Requires Chrome 111 or later</span>
+              </p>
+              <ol>
+                <li>
+                  <span class="zh">在 GitHub Releases 下载 <code>.zip</code> 并解压</span
+                  ><span class="en"
+                    >Download the <code>.zip</code> from GitHub Releases and unpack it</span
+                  >
+                </li>
+                <li>
+                  <span class="zh">打开 <code>chrome://extensions</code>，开启「开发者模式」</span
+                  ><span class="en"
+                    >Open <code>chrome://extensions</code> and turn on Developer mode</span
+                  >
+                </li>
+                <li>
+                  <span class="zh">点「加载已解压的扩展程序」，选择解压后的文件夹</span
+                  ><span class="en">Click “Load unpacked” and choose the unpacked folder</span>
+                </li>
+              </ol>
+              <a
+                class="button"
+                href="https://github.com/rHanbowChic/wikidot-monaco/releases"
+                target="_blank"
+                rel="noopener"
+                ><span class="zh">前往 GitHub Releases</span
+                ><span class="en">Go to GitHub Releases</span></a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Build from source -->
+      <section class="band alt">
+        <div class="wrap split">
+          <div>
+            <h2><span class="zh">从源码构建</span><span class="en">Build from source</span></h2>
+            <p class="section-lead">
+              <span class="zh"
+                >用 TypeScript 和 Vite 构建。<code>build/</code> 可直接作为已解压的扩展加载到
+                Chrome，Firefox 版输出到 <code>build-firefox/</code>。</span
+              >
+              <span class="en"
+                >Built with TypeScript and Vite. Load <code>build/</code> in Chrome as an unpacked
+                extension; the Firefox build goes to <code>build-firefox/</code>.</span
+              >
+            </p>
+          </div>
+          <pre
+            class="terminal"
+          ><code><span class="prompt">$</span> git clone https://github.com/rHanbowChic/wikidot-monaco
+<span class="prompt">$</span> cd wikidot-monaco
+<span class="prompt">$</span> npm install
+<span class="prompt">$</span> npm run build          <span class="comment"># Chrome → build/</span>
+<span class="prompt">$</span> npm run build:firefox  <span class="comment"># Firefox → build-firefox/</span></code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div class="brand small">
+          <img src="logo.png" alt="" width="20" height="20" />
+          <span>Wikidot Monaco</span>
+        </div>
+        <ul>
+          <li>
+            <a href="https://github.com/rHanbowChic/wikidot-monaco" target="_blank" rel="noopener"
+              >GitHub</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/rHanbowChic/wikidot-monaco/blob/main/CHANGELOG.md"
+              target="_blank"
+              rel="noopener"
+              ><span class="zh">更新日志</span><span class="en">Changelog</span></a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/rHanbowChic/wikidot-monaco/issues"
+              target="_blank"
+              rel="noopener"
+              ><span class="zh">反馈问题</span><span class="en">Report a problem</span></a
+            >
+          </li>
+        </ul>
+        <p class="muted">
+          <span class="zh">MIT 许可。与 Wikidot 及 Microsoft 无关。</span
+          ><span class="en">MIT licensed. Not affiliated with Wikidot or Microsoft.</span>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      const root = document.documentElement
+      const ticks = document.querySelectorAll('.tick')
+
+      function applyLang() {
+        const en = root.classList.contains('en')
+        root.lang = en ? 'en' : 'zh-CN'
+        // The checkboxes are named by the text next to them, in the shown language.
+        for (const tick of ticks) {
+          tick.setAttribute(
+            'aria-label',
+            tick.parentElement.querySelector(en ? '.en' : '.zh').textContent,
+          )
+        }
+      }
+      applyLang()
+      document.getElementById('lang').addEventListener('click', () => {
+        const en = root.classList.toggle('en')
+        applyLang()
+        try {
+          localStorage.setItem('lang', en ? 'en' : 'zh')
+        } catch {}
+      })
+
+      // These features stay on: clicking only shakes the box.
+      for (const tick of ticks) {
+        tick.addEventListener('click', () => {
+          tick.classList.remove('shake')
+          void tick.offsetWidth // restart the animation on quick repeated clicks
+          tick.classList.add('shake')
+        })
+        tick.addEventListener('animationend', () => tick.classList.remove('shake'))
+      }
+
+      // Settings panel: the menu switches the shown category.
+      const panel = document.getElementById('panel')
+      for (const button of panel.querySelectorAll('.panel-nav button')) {
+        button.addEventListener('click', () => {
+          for (const other of panel.querySelectorAll('.panel-nav button')) {
+            if (other === button) other.setAttribute('aria-current', 'true')
+            else other.removeAttribute('aria-current')
+          }
+          for (const category of panel.querySelectorAll('.category')) {
+            category.inert = category.dataset.category !== button.dataset.category
+          }
+        })
+      }
+    </script>
+  </body>
+</html>
