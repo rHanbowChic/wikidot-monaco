@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.0
+
+- fix: 少数站点下编辑器宽度会越来越宽；编辑器宽度不再受站点样式表影响
+- docs: 项目主页（`site/`）
+- chore: 推送到 `release` 分支时自动构建 Chrome `.crx` 与 Firefox `.zip`，放入 GitHub Release 草稿
+
 ## 0.0.7
 
 - feat: 右键菜单加入「切换到纯文本框」；切换后 −/+ 按钮旁出现「Monaco」按钮，可切换回编辑器，内容与选区保留
