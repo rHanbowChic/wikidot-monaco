@@ -610,6 +610,17 @@
                 <summary>
                   <span class="zh">手动安装</span><span class="en">Install manually</span>
                 </summary>
+                <p>
+                  <span class="zh"
+                    >GitHub Releases 提供的是未经 Mozilla 签名的 <code>.zip</code>，Firefox
+                    正式版只能临时载入，重启后失效；Developer Edition、Nightly 与 ESR
+                    可以长期安装。</span
+                  ><span class="en"
+                    >GitHub Releases has an unsigned <code>.zip</code>. Release Firefox only loads
+                    it until the next restart; Developer Edition, Nightly and ESR can keep it
+                    installed.</span
+                  >
+                </p>
                 <ol>
                   <li>
                     <span class="zh"
@@ -620,9 +631,9 @@
                         rel="noopener"
                         >GitHub Releases</a
                       >
-                      下载经 Mozilla 签名的 <code>.xpi</code></span
+                      下载 <code>-firefox.zip</code></span
                     ><span class="en"
-                      >Download the <code>.xpi</code> signed by Mozilla from
+                      >Download the <code>-firefox.zip</code> from
                       <a
                         href="https://github.com/rHanbowChic/wikidot-monaco/releases"
                         target="_blank"
@@ -633,15 +644,26 @@
                   </li>
                   <li>
                     <span class="zh"
-                      >把文件拖进 Firefox 窗口，或在
-                      <code>about:addons</code> 中「从文件安装附加组件」</span
+                      >临时载入：打开 <code>about:debugging</code> 的「此
+                      Firefox」页，点「临时载入附加组件」并选择该 <code>.zip</code></span
                     ><span class="en"
-                      >Drop it on a Firefox window, or use “Install Add-on From File” in
-                      <code>about:addons</code></span
+                      >To load it until restart: open “This Firefox” in
+                      <code>about:debugging</code>, click “Load Temporary Add-on” and choose the
+                      <code>.zip</code></span
                     >
                   </li>
                   <li>
-                    <span class="zh">确认添加</span><span class="en">Confirm the install</span>
+                    <span class="zh"
+                      >长期安装（Developer Edition、Nightly、ESR）：在 <code>about:config</code> 把
+                      <code>xpinstall.signatures.required</code> 设为
+                      <code>false</code>，将文件扩展名改为 <code>.xpi</code>，再在
+                      <code>about:addons</code> 中「从文件安装附加组件」</span
+                    ><span class="en"
+                      >To keep it (Developer Edition, Nightly, ESR): set
+                      <code>xpinstall.signatures.required</code> to <code>false</code> in
+                      <code>about:config</code>, rename the file to <code>.xpi</code>, then use
+                      “Install Add-on From File” in <code>about:addons</code></span
+                    >
                   </li>
                 </ol>
               </details>
@@ -654,10 +676,8 @@
               </p>
               <ol>
                 <li>
-                  <span class="zh">在 GitHub Releases 下载 <code>.zip</code> 并解压</span
-                  ><span class="en"
-                    >Download the <code>.zip</code> from GitHub Releases and unpack it</span
-                  >
+                  <span class="zh">在 GitHub Releases 下载 <code>.crx</code></span
+                  ><span class="en">Download the <code>.crx</code> from GitHub Releases</span>
                 </li>
                 <li>
                   <span class="zh">打开 <code>chrome://extensions</code>，开启「开发者模式」</span
@@ -666,10 +686,21 @@
                   >
                 </li>
                 <li>
-                  <span class="zh">点「加载已解压的扩展程序」，选择解压后的文件夹</span
-                  ><span class="en">Click “Load unpacked” and choose the unpacked folder</span>
+                  <span class="zh">把 <code>.crx</code> 文件拖进该页面，确认添加</span
+                  ><span class="en">Drop the <code>.crx</code> on that page and confirm</span>
                 </li>
               </ol>
+              <p class="note">
+                <span class="zh"
+                  >如果浏览器以「不是来自应用商店」为由停用了扩展：用 7-Zip 等工具把
+                  <code>.crx</code>
+                  当作压缩包解压，再点「加载已解压的扩展程序」选择解压后的文件夹。</span
+                ><span class="en"
+                  >If the browser turns it off as not from the store, extract the
+                  <code>.crx</code> as an archive (e.g. with 7-Zip), then click “Load unpacked” and
+                  choose the extracted folder.</span
+                >
+              </p>
               <a
                 class="button"
                 href="https://github.com/rHanbowChic/wikidot-monaco/releases"
@@ -683,29 +714,196 @@
         </div>
       </section>
 
-      <!-- Build from source -->
-      <section class="band alt">
-        <div class="wrap split">
-          <div>
-            <h2><span class="zh">从源码构建</span><span class="en">Build from source</span></h2>
-            <p class="section-lead">
-              <span class="zh"
-                >用 TypeScript 和 Vite 构建。<code>build/</code> 可直接作为已解压的扩展加载到
-                Chrome，Firefox 版输出到 <code>build-firefox/</code>。</span
-              >
-              <span class="en"
-                >Built with TypeScript and Vite. Load <code>build/</code> in Chrome as an unpacked
-                extension; the Firefox build goes to <code>build-firefox/</code>.</span
-              >
-            </p>
-          </div>
-          <pre
-            class="terminal"
-          ><code><span class="prompt">$</span> git clone https://github.com/rHanbowChic/wikidot-monaco
+      <!-- Build from source: worded as reference docs rather than marketing copy. -->
+      <section id="build" class="band alt">
+        <div class="wrap">
+          <h2><span class="zh">从源码构建</span><span class="en">Build from source</span></h2>
+          <p class="section-lead">
+            <span class="zh"
+              >需要 Git 与 Node.js 20 或更新版本（含 npm），Linux、macOS、Windows
+              均可，不需要其他全局安装的工具。</span
+            ><span class="en"
+              >Requires Git and Node.js 20 or later (with npm). Works on Linux, macOS and Windows;
+              no other global tools are needed.</span
+            >
+          </p>
+
+          <div class="build-steps">
+            <div class="build-step">
+              <h3>
+                <span class="zh">1. 获取源码与依赖</span
+                ><span class="en">1. Get the source and dependencies</span>
+              </h3>
+              <pre
+                class="terminal"
+              ><code><span class="prompt">$</span> git clone https://github.com/rHanbowChic/wikidot-monaco
 <span class="prompt">$</span> cd wikidot-monaco
-<span class="prompt">$</span> npm install
-<span class="prompt">$</span> npm run build          <span class="comment"># Chrome → build/</span>
+<span class="prompt">$</span> npm ci</code></pre>
+              <p>
+                <span class="zh"
+                  ><code>npm ci</code> 按 <code>package-lock.json</code> 安装锁定版本的依赖。Monaco
+                  编辑器是 npm 依赖，会完整打包进扩展，运行时不访问任何 CDN。</span
+                ><span class="en"
+                  ><code>npm ci</code> installs the exact versions in
+                  <code>package-lock.json</code>. Monaco is an npm dependency bundled into the
+                  extension; nothing is loaded from a CDN at run time.</span
+                >
+              </p>
+            </div>
+
+            <div class="build-step">
+              <h3><span class="zh">2. 构建</span><span class="en">2. Build</span></h3>
+              <pre
+                class="terminal"
+              ><code><span class="prompt">$</span> npm run build          <span class="comment"># Chrome  → build/</span>
 <span class="prompt">$</span> npm run build:firefox  <span class="comment"># Firefox → build-firefox/</span></code></pre>
+              <p>
+                <span class="zh"
+                  >两个命令都先运行 <code>tsc</code> 做类型检查（不输出文件），再由
+                  <code>scripts/build.mjs</code> 调用
+                  Vite，分别构建设置页、后台脚本、两个内容脚本与按需加载的编辑器模块。两个版本源码相同，只有
+                  manifest 在构建时转换：<code>background.service_worker</code> 换成
+                  <code>background.scripts</code>，并加上
+                  <code>browser_specific_settings.gecko</code>。版本号取自
+                  <code>package.json</code>。</span
+                ><span class="en"
+                  >Both run <code>tsc</code> for type checking only, then
+                  <code>scripts/build.mjs</code> runs Vite for the options page, the background
+                  script, the two content scripts and the editor module that loads on demand. The
+                  source is shared; only the manifest is converted for Firefox:
+                  <code>background.service_worker</code> becomes <code>background.scripts</code> and
+                  <code>browser_specific_settings.gecko</code> is added. The version comes from
+                  <code>package.json</code>.</span
+                >
+              </p>
+            </div>
+
+            <div class="build-step">
+              <h3><span class="zh">3. 载入浏览器</span><span class="en">3. Load it</span></h3>
+              <ul>
+                <li>
+                  <span class="zh"
+                    ><strong>Chrome / Edge</strong>：在
+                    <code>chrome://extensions</code>
+                    开启「开发者模式」，点「加载已解压的扩展程序」，选择 <code>build/</code>。</span
+                  ><span class="en"
+                    ><strong>Chrome / Edge</strong>: turn on Developer mode in
+                    <code>chrome://extensions</code>, click “Load unpacked” and choose
+                    <code>build/</code>.</span
+                  >
+                </li>
+                <li>
+                  <span class="zh"
+                    ><strong>Firefox</strong>：在 <code>about:debugging</code> 的「此
+                    Firefox」页点「临时载入附加组件」，选择
+                    <code>build-firefox/manifest.json</code>。</span
+                  ><span class="en"
+                    ><strong>Firefox</strong>: in “This Firefox” under <code>about:debugging</code>,
+                    click “Load Temporary Add-on” and choose
+                    <code>build-firefox/manifest.json</code>.</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            <div class="build-step">
+              <h3><span class="zh">4. 开发</span><span class="en">4. Develop</span></h3>
+              <pre
+                class="terminal"
+              ><code><span class="prompt">$</span> npm run dev          <span class="comment"># watch → build/</span>
+<span class="prompt">$</span> npm run dev:firefox  <span class="comment"># watch → build-firefox/</span>
+<span class="prompt">$</span> npm run run:firefox  <span class="comment"># Firefox with a temporary profile</span></code></pre>
+              <p>
+                <span class="zh"
+                  ><code>dev</code> 监听源码并在修改后重新构建，之后需在扩展页重新载入扩展并刷新
+                  wikidot 页面。<code>run:firefox</code> 用临时配置启动 Firefox 并载入
+                  <code>build-firefox/</code>，文件变化时自动重载，可与
+                  <code>dev:firefox</code> 同时运行。</span
+                ><span class="en"
+                  ><code>dev</code> rebuilds on every change; reload the extension on the extensions
+                  page and refresh the wikidot page afterwards. <code>run:firefox</code> starts
+                  Firefox with a temporary profile, loads <code>build-firefox/</code> and reloads it
+                  when files change; run it alongside <code>dev:firefox</code>.</span
+                >
+              </p>
+            </div>
+          </div>
+
+          <h3 class="build-subhead">
+            <span class="zh">打包</span><span class="en">Packaging</span>
+          </h3>
+          <div class="table-scroll">
+            <table class="commands">
+              <thead>
+                <tr>
+                  <th><span class="zh">命令</span><span class="en">Command</span></th>
+                  <th><span class="zh">输出</span><span class="en">Output</span></th>
+                  <th><span class="zh">说明</span><span class="en">Notes</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>npm run zip</code></td>
+                  <td><code>package/Wikidot-Monaco-&lt;version&gt;.zip</code></td>
+                  <td>
+                    <span class="zh">Chrome 应用商店上传用</span
+                    ><span class="en">For uploading to the Chrome Web Store</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>npm run crx</code></td>
+                  <td><code>package/Wikidot-Monaco-&lt;version&gt;.crx</code></td>
+                  <td>
+                    <span class="zh"
+                      >私钥由环境变量 <code>CRX_KEY</code> 指定，默认
+                      <code>~/Documents/wikidot-monaco/key.pem</code
+                      >，不存在时自动生成。私钥决定扩展 ID，发布时应一直使用同一个。</span
+                    ><span class="en"
+                      >The private key is read from <code>CRX_KEY</code>, by default
+                      <code>~/Documents/wikidot-monaco/key.pem</code>, and created if missing. The
+                      key decides the extension ID, so keep using the same one.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>npm run zip:firefox</code></td>
+                  <td><code>package/wikidot-monaco-&lt;version&gt;-firefox.zip</code></td>
+                  <td>
+                    <span class="zh">未签名，由 web-ext 打包</span
+                    ><span class="en">Unsigned, packed by web-ext</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>npm run lint:firefox</code></td>
+                  <td></td>
+                  <td>
+                    <span class="zh">构建并用 web-ext 按 AMO 规则检查</span
+                    ><span class="en">Builds and checks against the AMO rules with web-ext</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="build-more">
+            <span class="zh"
+              >发布流程、Firefox 签名与目录结构见
+              <a
+                href="https://github.com/rHanbowChic/wikidot-monaco#readme"
+                target="_blank"
+                rel="noopener"
+                >README</a
+              >。</span
+            ><span class="en"
+              >See the
+              <a
+                href="https://github.com/rHanbowChic/wikidot-monaco#readme"
+                target="_blank"
+                rel="noopener"
+                >README</a
+              >
+              (in Chinese) for the release workflow, Firefox signing and the source layout.</span
+            >
+          </p>
         </div>
       </section>
     </main>
