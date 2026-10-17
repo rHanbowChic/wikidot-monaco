@@ -25,3 +25,6 @@
 secrets.*.js
 # extension signing key
 *.pem
+
+# local Claude Code settings and skills
+.claude/
