@@ -101,16 +101,16 @@ const BASE_OPTIONS: monaco.editor.IEditorOptions = {
 }
 
 /**
- * The width for a border-box wrapper that takes `element`'s place, as its stylesheets set it.
- * Call while `element` is hidden: the computed width of an element that isn't rendered keeps
- * percentages, where a rendered one's is in pixels and wouldn't follow the page's width.
- * `extra` is the padding and border to add to a content-box width.
+ * A width (`width` or `min-width`) for a border-box wrapper that takes `element`'s place, as
+ * its stylesheets set it. Call while `element` is hidden: the computed width of an element
+ * that isn't rendered keeps percentages, where a rendered one's is in pixels and wouldn't
+ * follow the page's width. `extra` is the padding and border to add to a content-box width.
+ * Null for a value without a length (`auto`, `fit-content` and the like).
  */
-function widthOf(element: HTMLElement, extra: number) {
+function widthOf(element: HTMLElement, name: 'width' | 'min-width', extra: number) {
   const style = getComputedStyle(element)
-  const width = style.width
-  // `auto`, `fit-content` and the like: fill the line, as before.
-  if (!/\d/.test(width)) return '100%'
+  const width = style.getPropertyValue(name)
+  if (!/\d/.test(width)) return null
   return style.boxSizing === 'border-box' || !extra ? width : `calc(${width} + ${extra}px)`
 }
 
@@ -154,13 +154,21 @@ function cover(element: HTMLElement, height: number) {
   const previousDisplay = element.style.getPropertyValue('display')
   const displayPriority = element.style.getPropertyPriority('display')
   force(element, { display: 'none' })
-  const width = widthOf(element, extra)
+  // `auto` and the like: fill the line, as before.
+  const width = widthOf(element, 'width', extra) ?? '100%'
+  // A zero minimum is no minimum; `auto` is the default anyway.
+  const minWidth =
+    parseFloat(getComputedStyle(element).minWidth) === 0
+      ? null
+      : widthOf(element, 'min-width', extra)
   element.after(wrapper)
   const border = sumOf(getComputedStyle(wrapper), ['border-left-width', 'border-right-width'])
   force(wrapper, {
     'box-sizing': 'border-box',
     width,
     'max-width': '100%',
+    // Like the width: a theme may widen the textarea with a minimum instead.
+    ...(minWidth && { 'min-width': minWidth }),
     // Monaco sizes its content to the wrapper's width in pixels. Without containment that
     // content would widen a parent that fits its content, which widens a percentage width
     // in turn: with `calc(100% + 14px)` the editor grew 14px on every layout. Ask the
