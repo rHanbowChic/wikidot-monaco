@@ -91,3 +91,93 @@ form:has(.wikidot-monaco) .change-textarea-size {
   box-shadow: none !important;
   text-shadow: none !important;
 }
+
+/*
+ * The find widget's buttons are <div class="button codicon …">, and wikidot themes style
+ * `.button` for the site's own buttons, some behind an ID selector. Reset what such rules
+ * tend to set, then restate Monaco's rules for these buttons (findWidget.css, codicon.css,
+ * and the focus outline from standalone-tokens.css) at the lifted specificity.
+ */
+.wikidot-monaco:not(#\#):not(#\#) .find-widget .button {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  float: none;
+  box-sizing: content-box;
+  display: flex;
+  flex: initial;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  min-width: auto;
+  min-height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0 0 0 3px;
+  padding: 3px;
+  border: 0;
+  border-radius: 5px;
+  outline: 0;
+  overflow: visible;
+  vertical-align: baseline;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: normal normal normal 16px/1 codicon;
+  font-variation-settings: normal;
+  letter-spacing: normal;
+  text-align: center;
+  text-decoration: none;
+  text-indent: 0;
+  text-shadow: none;
+  text-transform: none;
+  text-rendering: auto;
+  white-space: normal;
+  cursor: pointer;
+  user-select: none;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  transition: none;
+  animation: none;
+  will-change: auto;
+  container-type: normal;
+}
+
+.wikidot-monaco:not(#\#):not(#\#) .find-widget .button:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.wikidot-monaco:not(#\#):not(#\#) .find-widget .button.disabled {
+  color: var(--vscode-disabledForeground);
+  cursor: default;
+}
+
+.wikidot-monaco:not(#\#):not(#\#) .find-widget .button.left {
+  margin: 4px 0 4px 5px;
+}
+
+.wikidot-monaco:not(#\#):not(#\#) .find-widget .button.toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 18px;
+  height: -webkit-fill-available;
+  border-radius: var(--vscode-cornerRadius-small);
+}
+
+.wikidot-monaco:not(#\#):not(#\#) .find-widget > .button.codicon-widget-close {
+  position: absolute;
+  top: 5px;
+  right: 4px;
+}
+
+.wikidot-monaco:not(#\#):not(#\#) .find-widget .button.toggle.disabled,
+.wikidot-monaco:not(#\#):not(#\#)
+  .find-widget.collapsed-find-widget
+  .button:is(.previous, .next, .replace, .replace-all) {
+  display: none;
+}
