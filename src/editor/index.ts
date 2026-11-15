@@ -3,6 +3,7 @@
 import { setLocale, t, tr, type Locale } from '../i18n'
 import { EVENT_OPEN_OPTIONS, type Settings } from '../settings'
 import { monaco } from './monaco'
+import './clipboard'
 import './style.css'
 import { FROM_REVISION, TO_REVISION } from '../content/revisions'
 import { readPageSource } from './pageSource'

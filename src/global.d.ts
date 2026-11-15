@@ -29,6 +29,21 @@ declare module 'monaco-editor/languages/features/html/htmlWorker' {
   }
 }
 
+// The context menu's Cut/Copy/Paste commands (see src/editor/clipboard.ts). Each is
+// undefined where the browser doesn't support that clipboard command.
+declare module 'monaco-editor/editor/contrib/clipboard/browser/clipboard' {
+  interface MultiCommand {
+    addImplementation(
+      priority: number,
+      name: string,
+      implementation: (accessor: unknown, args: unknown) => boolean | Promise<void>,
+    ): { dispose(): void }
+  }
+  export const CutAction: MultiCommand | undefined
+  export const CopyAction: MultiCommand | undefined
+  export const PasteAction: MultiCommand | undefined
+}
+
 declare module 'monaco-editor/languages/features/common/lspLanguageFeatures' {
   import type { languages } from 'monaco-editor/editor/editor.api'
   export class CompletionAdapter implements languages.CompletionItemProvider {
