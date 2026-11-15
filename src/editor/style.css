@@ -93,6 +93,21 @@ form:has(.wikidot-monaco) .change-textarea-size {
 }
 
 /*
+ * Monaco sets its font inline on the line containers and measures character widths with
+ * it. Site rules with `!important`, or rules on `span`/`div` that reach the token spans
+ * inside, swap in another font, and the cursor and selection drift from the text. Pin
+ * the editor's font (--wikidot-monaco-font, set by cover()) on its text, but not on
+ * codicons, which use their own icon font.
+ */
+.wikidot-monaco:not(#\#):not(#\#)
+  :is(.view-lines, .margin-view-overlays, .cursors-layer, .inputarea, .ime-text-area),
+.wikidot-monaco:not(#\#):not(#\#)
+  :is(.view-lines, .margin-view-overlays, .cursors-layer)
+  :not(.codicon) {
+  font-family: var(--wikidot-monaco-font) !important;
+}
+
+/*
  * The find widget's buttons are <div class="button codicon …">, and wikidot themes style
  * `.button` for the site's own buttons, some behind an ID selector. Reset what such rules
  * tend to set, then restate Monaco's rules for these buttons (findWidget.css, codicon.css,

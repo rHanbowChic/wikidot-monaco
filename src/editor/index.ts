@@ -177,6 +177,11 @@ function cover(element: HTMLElement, height: number) {
     contain: 'inline-size',
     'contain-intrinsic-inline-size': `${Math.max(intrinsic - border, 0)}px`,
   })
+  // For the stylesheet's rule that keeps site fonts off the editor's text.
+  wrapper.style.setProperty(
+    '--wikidot-monaco-font',
+    monaco.editor.EditorOptions.fontFamily.defaultValue,
+  )
   const uncover = () => {
     wrapper.remove()
     element.style.setProperty('display', previousDisplay, displayPriority)
