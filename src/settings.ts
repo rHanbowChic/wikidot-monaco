@@ -41,6 +41,24 @@ export const DEFAULT_SETTINGS: Settings = {
   saveTimeout: 30,
 }
 
+/**
+ * Themes chosen for single sites from the editor's context menu, by hostname. Stored under
+ * their own key beside the settings: the options form only removes entries.
+ */
+export type SiteThemes = Record<string, ThemeMode>
+export const SITE_THEMES_KEY = 'siteThemes'
+
+export const THEME_MODES: readonly ThemeMode[] = ['auto', 'light', 'dark']
+
+/** Splits what `chrome.storage.sync.get(null)` returned into the settings and the site themes. */
+export function readStorage(raw: Record<string, unknown> | undefined) {
+  const { [SITE_THEMES_KEY]: siteThemes, ...settings } = raw ?? {}
+  return {
+    settings: normalizeSettings(settings as Partial<Settings>),
+    siteThemes: { ...(siteThemes as SiteThemes | undefined) },
+  }
+}
+
 export function normalizeSettings(raw: Partial<Settings> | undefined): Settings {
   return { ...DEFAULT_SETTINGS, ...raw }
 }
@@ -50,10 +68,13 @@ export const EVENT_SETTINGS = 'wikidot-monaco:settings'
 export const EVENT_READY = 'wikidot-monaco:ready'
 /** From the page world: open the settings page (only the background can). */
 export const EVENT_OPEN_OPTIONS = 'wikidot-monaco:open-options'
+/** From the page world: use this theme (detail: a ThemeMode) on the current site. */
+export const EVENT_SET_SITE_THEME = 'wikidot-monaco:set-site-theme'
 /** Runtime message from the content script to the background. */
 export const MESSAGE_OPEN_OPTIONS = 'open-options'
 
 export interface SettingsMessage {
+  /** `theme` is the current site's own theme where it has one, else the default. */
   settings: Settings
   /** UI language; the page world has no access to chrome.i18n. */
   locale: Locale

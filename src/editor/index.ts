@@ -1,7 +1,13 @@
 // Lazily loaded into the page (MAIN world) when a wikidot editor textarea or a
 // `div.page-source` appears.
-import { setLocale, t, tr, type Locale } from '../i18n'
-import { EVENT_OPEN_OPTIONS, type Settings } from '../settings'
+import { setLocale, t, tr, type Locale, type Text } from '../i18n'
+import {
+  EVENT_OPEN_OPTIONS,
+  EVENT_SET_SITE_THEME,
+  THEME_MODES,
+  type Settings,
+  type ThemeMode,
+} from '../settings'
 import { monaco } from './monaco'
 import './clipboard'
 import './style.css'
@@ -67,6 +73,29 @@ function registerSettingsAction() {
   })
 }
 
+const SITE_THEME_LABELS: Record<ThemeMode, Text> = {
+  light: t('Use Light Theme on This Site', '此站点使用浅色主题'),
+  dark: t('Use Dark Theme on This Site', '此站点使用深色主题'),
+  auto: t('Follow System Theme on This Site', '此站点主题跟随系统'),
+}
+let siteThemeActions: monaco.IDisposable[] = []
+
+/** Context menu items that switch the current site to each of the other two themes. */
+function registerSiteThemeActions() {
+  // Re-registered so they follow the current theme and the UI language.
+  for (const action of siteThemeActions) action.dispose()
+  siteThemeActions = THEME_MODES.filter((mode) => mode !== settings.theme).map((mode, i) =>
+    monaco.editor.addEditorAction({
+      id: `wikidot-monaco.siteTheme.${mode}`,
+      label: tr(SITE_THEME_LABELS[mode]),
+      contextMenuGroupId: 'y_theme',
+      contextMenuOrder: i,
+      // The content script stores it; the settings it sends back then apply the theme.
+      run: () => void window.dispatchEvent(new CustomEvent(EVENT_SET_SITE_THEME, { detail: mode })),
+    }),
+  )
+}
+
 export function configure(next: Settings, locale: Locale) {
   settings = next
   setLocale(locale)
@@ -74,6 +103,7 @@ export function configure(next: Settings, locale: Locale) {
   completionOptions.closeTags = next.closeTags
   registerWikidot()
   registerSettingsAction()
+  registerSiteThemeActions()
   applyTheme()
   for (const instance of instances.values()) instance.configure()
 }

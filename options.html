@@ -65,11 +65,24 @@
               <h2 id="appearance-title" data-i18n="appearance"></h2>
               <div class="setting">
                 <label class="title" for="theme" data-i18n="theme"></label>
+                <p class="description" data-i18n="themeHint"></p>
                 <select id="theme" name="theme">
                   <option value="auto" data-i18n="themeAuto"></option>
                   <option value="light" data-i18n="themeLight"></option>
                   <option value="dark" data-i18n="themeDark"></option>
                 </select>
+              </div>
+              <!-- Filled in by src/options/index.ts; not a form field. -->
+              <div class="setting">
+                <div class="title" id="site-themes-title" data-i18n="siteThemes"></div>
+                <p class="description" data-i18n="siteThemesHint"></p>
+                <ul id="site-themes" aria-labelledby="site-themes-title"></ul>
+                <p
+                  id="site-themes-empty"
+                  class="description"
+                  data-i18n="siteThemesEmpty"
+                  hidden
+                ></p>
               </div>
               <div class="setting">
                 <label class="title" for="fontSize" data-i18n="fontSize"></label>

@@ -4,17 +4,30 @@ import { uiLocale } from '../i18n'
 import {
   EVENT_OPEN_OPTIONS,
   EVENT_READY,
+  EVENT_SET_SITE_THEME,
   EVENT_SETTINGS,
   MESSAGE_OPEN_OPTIONS,
-  normalizeSettings,
+  readStorage,
+  SITE_THEMES_KEY,
+  THEME_MODES,
   type Settings,
   type SettingsMessage,
+  type ThemeMode,
 } from '../settings'
 
-const load = () =>
-  new Promise<Settings>((resolve) =>
-    chrome.storage.sync.get(null, (raw) => resolve(normalizeSettings(raw as Partial<Settings>))),
+const site = location.hostname
+
+const readAll = () =>
+  new Promise<ReturnType<typeof readStorage>>((resolve) =>
+    chrome.storage.sync.get(null, (raw) => resolve(readStorage(raw))),
   )
+
+/** The settings, with this site's own theme in place of the default. */
+const load = () =>
+  readAll().then(({ settings, siteThemes }) => ({
+    ...settings,
+    theme: siteThemes[site] ?? settings.theme,
+  }))
 
 let current = load()
 
@@ -35,6 +48,14 @@ window.addEventListener(EVENT_READY, () => current.then(send))
 
 // The editor's "Settings" menu item; only the background may open the options page.
 window.addEventListener(EVENT_OPEN_OPTIONS, () => chrome.runtime.sendMessage(MESSAGE_OPEN_OPTIONS))
+
+// The editor's theme items in the context menu: remember the theme for this site only.
+window.addEventListener(EVENT_SET_SITE_THEME, async (event) => {
+  const theme = (event as CustomEvent<string>).detail as ThemeMode
+  if (!THEME_MODES.includes(theme)) return
+  const { siteThemes } = await readAll()
+  chrome.storage.sync.set({ [SITE_THEMES_KEY]: { ...siteThemes, [site]: theme } })
+})
 
 chrome.storage.onChanged.addListener((_changes, area) => {
   if (area !== 'sync') return

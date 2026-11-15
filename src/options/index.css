@@ -265,6 +265,37 @@ button.danger:hover {
   background: var(--danger-hover);
 }
 
+/* Sites with a theme of their own: name, theme, and a button to clear it. */
+#site-themes {
+  max-width: 560px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#site-themes li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#site-themes .site-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--fg-strong);
+}
+
+#site-themes .site-theme {
+  color: var(--muted);
+}
+
+#site-themes-empty {
+  margin-bottom: 0;
+}
+
 #status {
   color: var(--muted);
 }

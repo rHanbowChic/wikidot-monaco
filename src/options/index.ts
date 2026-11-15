@@ -1,5 +1,12 @@
 import { setLocale, tr, uiLocale } from '../i18n'
-import { DEFAULT_SETTINGS, normalizeSettings, type Settings } from '../settings'
+import {
+  DEFAULT_SETTINGS,
+  readStorage,
+  SITE_THEMES_KEY,
+  type Settings,
+  type SiteThemes,
+  type ThemeMode,
+} from '../settings'
 import './index.css'
 import { MESSAGES, type MessageKey } from './messages'
 
@@ -122,7 +129,55 @@ function save(settings: Settings) {
   })
 }
 
-chrome.storage.sync.get(null, (raw) => render(normalizeSettings(raw as Partial<Settings>)))
+const siteList = document.getElementById('site-themes')!
+const siteEmpty = document.getElementById('site-themes-empty')!
+const THEME_NAMES: Record<ThemeMode, MessageKey> = {
+  auto: 'themeAuto',
+  light: 'themeLight',
+  dark: 'themeDark',
+}
+
+function renderSites(siteThemes: SiteThemes) {
+  const sites = Object.keys(siteThemes).sort()
+  siteList.hidden = sites.length === 0
+  siteEmpty.hidden = sites.length > 0
+  siteList.replaceChildren(
+    ...sites.map((site) => {
+      const item = document.createElement('li')
+      const name = document.createElement('span')
+      name.className = 'site-name'
+      name.textContent = site
+      const theme = document.createElement('span')
+      theme.className = 'site-theme'
+      theme.textContent = tr(MESSAGES[THEME_NAMES[siteThemes[site]] ?? 'themeAuto'])
+      const clear = document.createElement('button')
+      clear.type = 'button'
+      clear.textContent = tr(MESSAGES.clear)
+      clear.setAttribute('aria-label', `${tr(MESSAGES.clear)} ${site}`)
+      clear.addEventListener('click', () => {
+        // Read again: the list may be out of date if another tab changed it meanwhile.
+        chrome.storage.sync.get(SITE_THEMES_KEY, (raw) => {
+          const { [site]: _, ...rest } = readStorage(raw).siteThemes
+          chrome.storage.sync.set({ [SITE_THEMES_KEY]: rest })
+        })
+      })
+      item.append(name, theme, clear)
+      return item
+    }),
+  )
+}
+
+chrome.storage.sync.get(null, (raw) => {
+  const { settings, siteThemes } = readStorage(raw)
+  render(settings)
+  renderSites(siteThemes)
+})
+// Sites are added from the editor's context menu, maybe while this page is open.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && SITE_THEMES_KEY in changes) {
+    renderSites({ ...(changes[SITE_THEMES_KEY].newValue as SiteThemes | undefined) })
+  }
+})
 form.addEventListener('change', () => {
   const settings = read()
   render(settings) // show clamped numbers
@@ -149,4 +204,5 @@ resetYes.addEventListener('click', () => {
   setConfirming(false)
   render(DEFAULT_SETTINGS)
   save(DEFAULT_SETTINGS)
+  chrome.storage.sync.remove(SITE_THEMES_KEY)
 })

@@ -23,6 +23,17 @@ export const MESSAGES = {
     '编辑页面、发帖和查看源代码时，使用带语法高亮的编辑器代替原本的文本框。',
   ),
   theme: t('Theme', '主题'),
+  themeHint: t(
+    'The theme of every site, unless one is chosen for the site from the editor’s context menu.',
+    '所有站点的默认主题。在编辑器的右键菜单中可以为单个站点另选主题。',
+  ),
+  siteThemes: t('Site themes', '站点主题'),
+  siteThemesHint: t(
+    'Sites with a theme of their own. Clear one to use the default theme there again.',
+    '单独设置过主题的站点。清除后，该站点重新使用默认主题。',
+  ),
+  siteThemesEmpty: t('No site has a theme of its own.', '还没有单独设置过主题的站点。'),
+  clear: t('Clear', '清除'),
   themeAuto: t('Follow system', '跟随系统'),
   themeLight: t('Light', '浅色'),
   themeDark: t('Dark', '深色'),
@@ -70,8 +81,8 @@ export const MESSAGES = {
   ),
   reset: t('Restore defaults', '恢复默认设置'),
   resetConfirm: t(
-    'This restores **all settings** to their defaults. This cannot be undone.',
-    '这会把**全部设置**恢复为默认值。此操作无法撤销。',
+    'This restores **all settings** to their defaults and clears the site themes. This cannot be undone.',
+    '这会把**全部设置**恢复为默认值，并清除所有站点主题。此操作无法撤销。',
   ),
   resetYes: t('Restore all', '全部恢复'),
   cancel: t('Cancel', '取消'),
